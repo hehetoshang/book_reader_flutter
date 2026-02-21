@@ -137,3 +137,164 @@ class SettingsProvider extends ChangeNotifier {
     final updatedPdfSettings = pdfSettings.copyWith(enableTextSelection: enable);
     final updatedSettings = settings.copyWith(pdfSettings: updatedPdfSettings);
     _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setPdfPageLayout(PdfPageLayout layout) async {
+    final updatedPdfSettings = pdfSettings.copyWith(pageLayout: layout);
+    final updatedSettings = settings.copyWith(pdfSettings: updatedPdfSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setPdfShowThumbnailSidebar(bool show) async {
+    final updatedPdfSettings = pdfSettings.copyWith(showThumbnailSidebar: show);
+    final updatedSettings = settings.copyWith(pdfSettings: updatedPdfSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setPdfEnableScrollByMouseWheel(bool enable) async {
+    final updatedPdfSettings = pdfSettings.copyWith(enableScrollByMouseWheel: enable);
+    final updatedSettings = settings.copyWith(pdfSettings: updatedPdfSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  // EPUB Settings
+  Future<void> setEpubFontSize(double size) async {
+    final updatedEpubSettings = epubSettings.copyWith(fontSize: size);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubLineHeight(double height) async {
+    final updatedEpubSettings = epubSettings.copyWith(lineHeight: height);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubLetterSpacing(double spacing) async {
+    final updatedEpubSettings = epubSettings.copyWith(letterSpacing: spacing);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubTextAlign(EpubTextAlign align) async {
+    final updatedEpubSettings = epubSettings.copyWith(textAlign: align);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubTheme(EpubTheme theme) async {
+    final updatedEpubSettings = epubSettings.copyWith(theme: theme);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubFontFamily(String? fontFamily) async {
+    final updatedEpubSettings = epubSettings.copyWith(fontFamily: fontFamily);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubSidePadding(double padding) async {
+    final updatedEpubSettings = epubSettings.copyWith(sidePadding: padding);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubTopBottomPadding(double padding) async {
+    final updatedEpubSettings = epubSettings.copyWith(topBottomPadding: padding);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  // Window Settings (Desktop only)
+  Future<void> setWindowSettings(WindowSettings windowSettings) async {
+    final updatedSettings = settings.copyWith(windowSettings: windowSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  // Reset all settings to default
+  Future<void> resetToDefaults() async {
+    _settings = _createDefaultSettings();
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  // Reset PDF settings to default
+  Future<void> resetPdfSettings() async {
+    final updatedSettings = settings.copyWith(
+      pdfSettings: PdfReaderSettings(),
+    );
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  // Reset EPUB settings to default
+  Future<void> resetEpubSettings() async {
+    final updatedSettings = settings.copyWith(
+      epubSettings: EpubReaderSettings(),
+    );
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  // Export settings
+  Map<String, dynamic> exportSettings() {
+    return settings.toMap();
+  }
+
+  // Import settings
+  Future<void> importSettings(Map<String, dynamic> data) async {
+    try {
+      // TODO: Implement settings import
+      debugPrint('Import settings: $data');
+      await _saveSettings();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to import settings: $e');
+    }
+  }
+}
+
+// Extension to convert between model EpubTextAlign and Flutter TextAlign
+extension EpubTextAlignExtension on EpubTextAlign {
+  flutter.TextAlign toFlutterTextAlign() {
+    switch (this) {
+      case EpubTextAlign.left:
+        return flutter.TextAlign.left;
+      case EpubTextAlign.center:
+        return flutter.TextAlign.center;
+      case EpubTextAlign.right:
+        return flutter.TextAlign.right;
+      case EpubTextAlign.justify:
+        return flutter.TextAlign.justify;
+    }
+  }
+}

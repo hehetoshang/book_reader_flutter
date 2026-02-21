@@ -150,30 +150,20 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
 
   Color _getBackgroundColor() {
     final theme = context.read<SettingsProvider>().epubTheme;
-    switch (theme) {
-      case EpubTheme.light:
-        return AppColors.epubLightBackground;
-      case EpubTheme.dark:
-        return AppColors.epubDarkBackground;
-      case EpubTheme.sepia:
-        return AppColors.epubSepiaBackground;
-      default:
-        return AppColors.epubLightBackground;
-    }
+    return switch (theme) {
+      EpubTheme.light => AppColors.epubLightBackground,
+      EpubTheme.dark => AppColors.epubDarkBackground,
+      EpubTheme.sepia => AppColors.epubSepiaBackground,
+    };
   }
 
   Color _getTextColor() {
     final theme = context.read<SettingsProvider>().epubTheme;
-    switch (theme) {
-      case EpubTheme.light:
-        return AppColors.epubLightText;
-      case EpubTheme.dark:
-        return AppColors.epubDarkText;
-      case EpubTheme.sepia:
-        return AppColors.epubSepiaText;
-      default:
-        return AppColors.epubLightText;
-    }
+    return switch (theme) {
+      EpubTheme.light => AppColors.epubLightText,
+      EpubTheme.dark => AppColors.epubDarkText,
+      EpubTheme.sepia => AppColors.epubSepiaText,
+    };
   }
 
   Widget _buildBottomToolbar() {
@@ -383,23 +373,23 @@ class EpubSettingsSheet extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.format_align_left),
             title: const Text('Text Alignment'),
-            trailing: DropdownButton<TextAlign>(
+            trailing: DropdownButton<EpubTextAlign>(
               value: settings.epubTextAlign,
               items: const [
                 DropdownMenuItem(
-                  value: TextAlign.left,
+                  value: EpubTextAlign.left,
                   child: Text('Left'),
                 ),
                 DropdownMenuItem(
-                  value: TextAlign.center,
+                  value: EpubTextAlign.center,
                   child: Text('Center'),
                 ),
                 DropdownMenuItem(
-                  value: TextAlign.right,
+                  value: EpubTextAlign.right,
                   child: Text('Right'),
                 ),
                 DropdownMenuItem(
-                  value: TextAlign.justify,
+                  value: EpubTextAlign.justify,
                   child: Text('Justify'),
                 ),
               ],

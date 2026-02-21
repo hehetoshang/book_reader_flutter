@@ -124,20 +124,20 @@ class SettingsScreen extends StatelessWidget {
           leading: const Icon(Icons.brightness_medium),
           title: const Text(AppStrings.themeMode),
           subtitle: Text(_getThemeModeName(settings.themeMode)),
-          trailing: DropdownButton<ThemeMode>(
+          trailing: DropdownButton<AppThemeMode>(
             value: settings.themeMode,
             underline: const SizedBox(),
             items: const [
               DropdownMenuItem(
-                value: ThemeMode.light,
+                value: AppThemeMode.light,
                 child: Text(AppStrings.light),
               ),
               DropdownMenuItem(
-                value: ThemeMode.dark,
+                value: AppThemeMode.dark,
                 child: Text(AppStrings.dark),
               ),
               DropdownMenuItem(
-                value: ThemeMode.system,
+                value: AppThemeMode.system,
                 child: Text(AppStrings.system),
               ),
             ],
@@ -185,13 +185,13 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  String _getThemeModeName(ThemeMode mode) {
+  String _getThemeModeName(AppThemeMode mode) {
     switch (mode) {
-      case ThemeMode.light:
+      case AppThemeMode.light:
         return AppStrings.light;
-      case ThemeMode.dark:
+      case AppThemeMode.dark:
         return AppStrings.dark;
-      case ThemeMode.system:
+      case AppThemeMode.system:
         return AppStrings.system;
     }
   }

@@ -54,7 +54,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    // PdfViewerController doesn't have dispose method in newer versions
     super.dispose();
   }
 
@@ -109,14 +109,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
               params: PdfViewerParams(
                 onPageChanged: (pageNumber) {
                   setState(() {
-                    _currentPage = pageNumber;
+                    _currentPage = pageNumber ?? 1;
                   });
                   _updateProgress();
-                },
-                onDocumentOpened: (document) {
-                  setState(() {
-                    _totalPages = document.pages.length;
-                  });
                 },
               ),
             ),

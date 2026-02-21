@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'models/models.dart' as models;
+import 'models/models.dart';
 import 'providers/providers.dart';
 import 'routes/app_router.dart';
 import 'services/services.dart';
@@ -146,13 +146,13 @@ class _AppContentState extends State<_AppContent> {
     );
   }
 
-  ThemeMode _getThemeMode(models.ThemeMode mode) {
+  ThemeMode _getThemeMode(AppThemeMode mode) {
     switch (mode) {
-      case models.ThemeMode.light:
+      case AppThemeMode.light:
         return ThemeMode.light;
-      case models.ThemeMode.dark:
+      case AppThemeMode.dark:
         return ThemeMode.dark;
-      case models.ThemeMode.system:
+      case AppThemeMode.system:
         return ThemeMode.system;
     }
   }

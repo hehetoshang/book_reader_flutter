@@ -17,7 +17,7 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return AppSettings(
-      themeMode: fields[0] as ThemeMode,
+      themeMode: fields[0] as AppThemeMode,
       languageCode: fields[1] as String,
       pdfSettings: fields[2] as PdfReaderSettings,
       epubSettings: fields[3] as EpubReaderSettings,
@@ -65,7 +65,7 @@ class PdfReaderSettingsAdapter extends TypeAdapter<PdfReaderSettings> {
     return PdfReaderSettings(
       defaultZoom: fields[0] as double,
       enableTextSelection: fields[1] as bool,
-      pageLayout: fields[2] as PageLayout,
+      pageLayout: fields[2] as PdfPageLayout,
       showThumbnailSidebar: fields[3] as bool,
       enableScrollByMouseWheel: fields[4] as bool,
     );
@@ -112,7 +112,7 @@ class EpubReaderSettingsAdapter extends TypeAdapter<EpubReaderSettings> {
       fontSize: fields[0] as double,
       lineHeight: fields[1] as double,
       letterSpacing: fields[2] as double,
-      textAlign: fields[3] as TextAlign,
+      textAlign: fields[3] as EpubTextAlign,
       theme: fields[4] as EpubTheme,
       fontFamily: fields[5] as String?,
       sidePadding: fields[6] as double,
@@ -202,34 +202,34 @@ class WindowSettingsAdapter extends TypeAdapter<WindowSettings> {
           typeId == other.typeId;
 }
 
-class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
+class AppThemeModeAdapter extends TypeAdapter<AppThemeMode> {
   @override
   final int typeId = 6;
 
   @override
-  ThemeMode read(BinaryReader reader) {
+  AppThemeMode read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return ThemeMode.light;
+        return AppThemeMode.light;
       case 1:
-        return ThemeMode.dark;
+        return AppThemeMode.dark;
       case 2:
-        return ThemeMode.system;
+        return AppThemeMode.system;
       default:
-        return ThemeMode.light;
+        return AppThemeMode.light;
     }
   }
 
   @override
-  void write(BinaryWriter writer, ThemeMode obj) {
+  void write(BinaryWriter writer, AppThemeMode obj) {
     switch (obj) {
-      case ThemeMode.light:
+      case AppThemeMode.light:
         writer.writeByte(0);
         break;
-      case ThemeMode.dark:
+      case AppThemeMode.dark:
         writer.writeByte(1);
         break;
-      case ThemeMode.system:
+      case AppThemeMode.system:
         writer.writeByte(2);
         break;
     }
@@ -241,39 +241,39 @@ class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ThemeModeAdapter &&
+      other is AppThemeModeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
 
-class PageLayoutAdapter extends TypeAdapter<PageLayout> {
+class PdfPageLayoutAdapter extends TypeAdapter<PdfPageLayout> {
   @override
   final int typeId = 8;
 
   @override
-  PageLayout read(BinaryReader reader) {
+  PdfPageLayout read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return PageLayout.single;
+        return PdfPageLayout.single;
       case 1:
-        return PageLayout.double;
+        return PdfPageLayout.double;
       case 2:
-        return PageLayout.continuous;
+        return PdfPageLayout.continuous;
       default:
-        return PageLayout.single;
+        return PdfPageLayout.single;
     }
   }
 
   @override
-  void write(BinaryWriter writer, PageLayout obj) {
+  void write(BinaryWriter writer, PdfPageLayout obj) {
     switch (obj) {
-      case PageLayout.single:
+      case PdfPageLayout.single:
         writer.writeByte(0);
         break;
-      case PageLayout.double:
+      case PdfPageLayout.double:
         writer.writeByte(1);
         break;
-      case PageLayout.continuous:
+      case PdfPageLayout.continuous:
         writer.writeByte(2);
         break;
     }
@@ -285,44 +285,44 @@ class PageLayoutAdapter extends TypeAdapter<PageLayout> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PageLayoutAdapter &&
+      other is PdfPageLayoutAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
 
-class TextAlignAdapter extends TypeAdapter<TextAlign> {
+class EpubTextAlignAdapter extends TypeAdapter<EpubTextAlign> {
   @override
   final int typeId = 10;
 
   @override
-  TextAlign read(BinaryReader reader) {
+  EpubTextAlign read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return TextAlign.left;
+        return EpubTextAlign.left;
       case 1:
-        return TextAlign.center;
+        return EpubTextAlign.center;
       case 2:
-        return TextAlign.right;
+        return EpubTextAlign.right;
       case 3:
-        return TextAlign.justify;
+        return EpubTextAlign.justify;
       default:
-        return TextAlign.left;
+        return EpubTextAlign.left;
     }
   }
 
   @override
-  void write(BinaryWriter writer, TextAlign obj) {
+  void write(BinaryWriter writer, EpubTextAlign obj) {
     switch (obj) {
-      case TextAlign.left:
+      case EpubTextAlign.left:
         writer.writeByte(0);
         break;
-      case TextAlign.center:
+      case EpubTextAlign.center:
         writer.writeByte(1);
         break;
-      case TextAlign.right:
+      case EpubTextAlign.right:
         writer.writeByte(2);
         break;
-      case TextAlign.justify:
+      case EpubTextAlign.justify:
         writer.writeByte(3);
         break;
     }
@@ -334,7 +334,7 @@ class TextAlignAdapter extends TypeAdapter<TextAlign> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TextAlignAdapter &&
+      other is EpubTextAlignAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
