@@ -33,10 +33,14 @@ class _AppContent extends StatefulWidget {
 class _AppContentState extends State<_AppContent> {
   bool _isLoading = true;
   String? _error;
+  late final SettingsProvider _settingsProvider;
+  late final BookProvider _bookProvider;
 
   @override
   void initState() {
     super.initState();
+    _settingsProvider = context.read<SettingsProvider>();
+    _bookProvider = context.read<BookProvider>();
     _initializeApp();
   }
 
@@ -44,21 +48,25 @@ class _AppContentState extends State<_AppContent> {
     try {
       // Initialize storage service
       await StorageService().initialize();
-      
+
       // Load settings
-      await context.read<SettingsProvider>().loadSettings();
-      
+      await _settingsProvider.loadSettings();
+
       // Load books
-      await context.read<BookProvider>().loadBooks();
-      
-      setState(() {
-        _isLoading = false;
-      });
+      await _bookProvider.loadBooks();
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -121,12 +129,12 @@ class _AppContentState extends State<_AppContent> {
         return MaterialApp.router(
           title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
-          
+
           // Theme configuration
           theme: AppThemes.lightTheme,
           darkTheme: AppThemes.darkTheme,
           themeMode: _getThemeMode(settings.themeMode),
-          
+
           // Localization
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
@@ -138,7 +146,7 @@ class _AppContentState extends State<_AppContent> {
             Locale('zh'),
           ],
           locale: settings.locale,
-          
+
           // Router
           routerConfig: AppRouter.router,
         );

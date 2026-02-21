@@ -5,7 +5,6 @@ import '../screens/screens.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
   static GoRouter get router => _router;
 
@@ -18,33 +17,16 @@ class AppRouter {
       GoRoute(
         path: '/',
         name: 'shelf',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const ShelfScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-        ),
+        builder: (context, state) => const ShelfScreen(),
       ),
 
       // PDF Reader Route
       GoRoute(
         path: '/pdf/:bookId',
         name: 'pdf_reader',
-        pageBuilder: (context, state) {
+        builder: (context, state) {
           final bookId = state.pathParameters['bookId']!;
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: PdfReaderScreen(bookId: bookId),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return MaterialPageRoute(
-                builder: (context) => child,
-              ).buildTransitions(context, animation, secondaryAnimation, child);
-            },
-          );
+          return PdfReaderScreen(bookId: bookId);
         },
       ),
 
@@ -52,17 +34,9 @@ class AppRouter {
       GoRoute(
         path: '/epub/:bookId',
         name: 'epub_reader',
-        pageBuilder: (context, state) {
+        builder: (context, state) {
           final bookId = state.pathParameters['bookId']!;
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: EpubReaderScreen(bookId: bookId),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return MaterialPageRoute(
-                builder: (context) => child,
-              ).buildTransitions(context, animation, secondaryAnimation, child);
-            },
-          );
+          return EpubReaderScreen(bookId: bookId);
         },
       ),
 
@@ -70,69 +44,42 @@ class AppRouter {
       GoRoute(
         path: '/settings',
         name: 'settings',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const SettingsScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
-          },
-        ),
+        builder: (context, state) => const SettingsScreen(),
       ),
 
       // About Route
       GoRoute(
         path: '/about',
         name: 'about',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const AboutScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 1),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
-          },
-        ),
+        builder: (context, state) => const AboutScreen(),
       ),
     ],
-    errorPageBuilder: (context, state) => MaterialPage(
-      key: state.pageKey,
-      child: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Page Not Found',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'The page ${state.uri.path} does not exist.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => context.go('/'),
-                child: const Text('Go Home'),
-              ),
-            ],
-          ),
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Page Not Found',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'The page ${state.uri.path} does not exist.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go('/'),
+              child: const Text('Go Home'),
+            ),
+          ],
         ),
       ),
     ),
