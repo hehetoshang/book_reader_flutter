@@ -44,13 +44,10 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       return;
     }
 
-    // 获取总页数
+    // 初始化总页数（如果Book对象中有）
     int totalPages = 1;
     if (book.totalPages != null && book.totalPages! > 1) {
       totalPages = book.totalPages!;
-    } else {
-      // 尝试从PDF文件中提取总页数
-      totalPages = await _extractPdfTotalPages(book.filePath);
     }
 
     setState(() {
@@ -61,27 +58,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
     // Initialize reading session
     await context.read<ReadingProvider>().startReading(book);
-  }
-
-  // 从PDF文件中提取总页数
-  Future<int> _extractPdfTotalPages(String filePath) async {
-    try {
-      final file = File(filePath);
-      if (await file.exists()) {
-        final bytes = await file.readAsBytes();
-        final content =
-            String.fromCharCodes(bytes.take(50000)); // 读取更多内容以确保找到所有页面
-
-        // 尝试匹配PDF页面
-        final pageMatches = RegExp(r'/Type\s*/Page[^s]').allMatches(content);
-        if (pageMatches.isNotEmpty) {
-          return pageMatches.length;
-        }
-      }
-    } catch (e) {
-      print('Error extracting PDF total pages: $e');
-    }
-    return 1;
   }
 
   @override
@@ -139,6 +115,12 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
               _book.filePath,
               controller: _controller,
               params: PdfViewerParams(
+                onDocumentLoaded: (document) {
+                  // 获取总页数
+                  setState(() {
+                    _totalPages = document.pagesCount;
+                  });
+                },
                 onPageChanged: (pageNumber) {
                   setState(() {
                     _currentPage = pageNumber ?? 1;
@@ -253,16 +235,34 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   }
 
   Future<void> _searchText(String query) async {
-    // PDF搜索功能（在pdfrx 2.2.15中暂不支持）
-    context.showSnackBar('Search: $query');
+    // 使用 pdfrx 的搜索功能
+    try {
+      final results = await _controller.searchText(query);
+      if (results.isEmpty) {
+        context.showSnackBar('No results found');
+      } else {
+        // 跳转到第一个搜索结果
+        _controller.goToPage(pageNumber: results.first.pageNumber);
+        context.showSnackBar('Found ${results.length} results');
+      }
+    } catch (e) {
+      print('Search failed: $e');
+      context.showSnackBar('Search: $query');
+    }
   }
 
   void _showSettings() {
     showModalBottomSheet(
       context: context,
       builder: (context) => PdfSettingsSheet(
+        controller: _controller,
         onZoomChanged: (zoom) {
-          // 缩放功能通过zoomUp/zoomDown实现
+          // 设置默认缩放
+          try {
+            _controller.setZoom(zoom / 100.0); // 转换百分比到倍数
+          } catch (e) {
+            print('Set zoom failed: $e');
+          }
         },
       ),
     );
@@ -270,10 +270,12 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 }
 
 class PdfSettingsSheet extends StatelessWidget {
+  final PdfViewerController? controller;
   final ValueChanged<double>? onZoomChanged;
 
   const PdfSettingsSheet({
     super.key,
+    this.controller,
     this.onZoomChanged,
   });
 
@@ -306,6 +308,12 @@ class PdfSettingsSheet extends StatelessWidget {
               onChanged: (value) {
                 if (value != null) {
                   final zoomPercent = double.parse(value.replaceAll('%', ''));
+                  // 尝试设置缩放
+                  try {
+                    controller?.setZoom(zoomPercent / 100.0);
+                  } catch (e) {
+                    print('Set zoom failed: $e');
+                  }
                   onZoomChanged?.call(zoomPercent);
                   Navigator.pop(context);
                 }
