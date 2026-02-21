@@ -24,7 +24,7 @@ dependencies:
   go_router: ^14.2.0
   
   # PDF阅读器（全平台支持）
-  pdfrx: ^2.2.15
+  pdfrx: ^2.2.20
   
   # EPUB阅读器（使用 flutter_epub_viewer）
   flutter_epub_viewer: ^1.2.0
