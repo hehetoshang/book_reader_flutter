@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
-import '../utils/utils.dart';
 import 'reading_progress_bar.dart';
 
 class BookCard extends StatelessWidget {
