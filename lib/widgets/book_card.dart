@@ -1,0 +1,245 @@
+import 'package:flutter/material.dart';
+import '../models/models.dart';
+import '../utils/utils.dart';
+import 'reading_progress_bar.dart';
+
+class BookCard extends StatelessWidget {
+  final Book book;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const BookCard({
+    super.key,
+    required this.book,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Cover Image
+            Expanded(
+              flex: 3,
+              child: _buildCover(),
+            ),
+            // Book Info
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Title
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    // Author
+                    if (book.author.isNotEmpty)
+                      Text(
+                        book.author,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    const Spacer(),
+                    // Progress Bar
+                    if (book.readingProgress > 0)
+                      ReadingProgressBar(
+                        progress: book.readingProgress,
+                        height: 3,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCover() {
+    if (book.coverPath != null) {
+      return Image.network(
+        book.coverPath!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+      );
+    }
+    return _buildPlaceholder();
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      color: Colors.grey[200],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              book.fileType == BookFileType.pdf
+                  ? Icons.picture_as_pdf
+                  : Icons.menu_book,
+              size: 48,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              book.fileType.displayName,
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BookListItem extends StatelessWidget {
+  final Book book;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const BookListItem({
+    super.key,
+    required this.book,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              // Cover/Icon
+              _buildCover(),
+              const SizedBox(width: 16),
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    if (book.author.isNotEmpty)
+                      Text(
+                        book.author,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          book.fileType == BookFileType.pdf
+                              ? Icons.picture_as_pdf
+                              : Icons.menu_book,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          book.fileType.displayName,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        if (book.readingProgress > 0) ...[
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ReadingProgressBar(
+                              progress: book.readingProgress,
+                              showPercentage: true,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Favorite indicator
+              if (book.isFavorite)
+                const Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                  size: 20,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCover() {
+    if (book.coverPath != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.network(
+          book.coverPath!,
+          width: 60,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+        ),
+      );
+    }
+    return _buildPlaceholder();
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 60,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Center(
+        child: Icon(
+          book.fileType == BookFileType.pdf
+              ? Icons.picture_as_pdf
+              : Icons.menu_book,
+          size: 28,
+          color: Colors.grey[400],
+        ),
+      ),
+    );
+  }
+}
