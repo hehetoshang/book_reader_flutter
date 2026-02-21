@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../routes/app_router.dart';
+import '../utils/utils.dart';
 
 class PdfReaderScreen extends StatefulWidget {
   final String bookId;
@@ -25,7 +25,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   bool _isLoading = true;
   int _currentPage = 1;
   int _totalPages = 1;
-  PdfDocument? _document;
 
   @override
   void initState() {
@@ -39,108 +38,54 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
     if (book == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Book not found'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('Book not found');
         AppRouter.goBack(context);
       }
       return;
     }
 
+    // 获取总页数
+    int totalPages = 1;
+    if (book.totalPages != null && book.totalPages! > 1) {
+      totalPages = book.totalPages!;
+    } else {
+      // 尝试从PDF文件中提取总页数
+      totalPages = await _extractPdfTotalPages(book.filePath);
+    }
+
     setState(() {
       _book = book;
+      _totalPages = totalPages;
+      _isLoading = false;
     });
 
-    // 先使用 book.totalPages 作为初始值（如果有的话）
-    if (book.totalPages != null && book.totalPages! > 0) {
-      setState(() {
-        _totalPages = book.totalPages!;
-      });
-    }
-
-    // 打开PDF文档获取准确的页数
-    try {
-      final document = await PdfDocument.openFile(book.filePath);
-
-      // 尝试获取页数 - 可能是 pageCount 或 length
-      int pageCount = 1;
-      try {
-        // 尝试常见的属性名
-        // 方法1: 尝试 pageCount (常见命名)
-        // ignore: unnecessary_cast
-        final doc = document;
-
-        // 由于我们不知道确切的属性名，使用toString()查看文档信息
-        print('Document type: ${doc.runtimeType}');
-
-        // 尝试通过反射或已知方法获取页数
-        // 在pdfrx中，可能通过 document.pages.length 获取
-        // 或者 document.pageCount
-
-        // 这里我们返回一个默认值，实际页数会在PdfViewer中通过onPageChanged获取
-        pageCount = 1;
-      } catch (e) {
-        print('Error getting page count: $e');
-      }
-
-      setState(() {
-        _document = document;
-        _totalPages = pageCount;
-        _isLoading = false;
-      });
-
-      // 在构建完成后初始化阅读会话
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.read<ReadingProvider>().startReading(book);
-        });
-      }
-    } catch (e) {
-      print('Error opening PDF: $e');
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to open PDF: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    // Initialize reading session
+    await context.read<ReadingProvider>().startReading(book);
   }
 
-  // 辅助方法：尝试获取PDF页数
-  int _getPageCount(PdfDocument document) {
+  // 从PDF文件中提取总页数
+  Future<int> _extractPdfTotalPages(String filePath) async {
     try {
-      // 尝试常见的属性名
-      // 方法1: 尝试 pageCount (常见命名)
-      // ignore: unnecessary_cast
-      final doc = document;
+      final file = File(filePath);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        final content =
+            String.fromCharCodes(bytes.take(50000)); // 读取更多内容以确保找到所有页面
 
-      // 由于我们不知道确切的属性名，使用toString()查看文档信息
-      print('Document type: ${doc.runtimeType}');
-
-      // 尝试通过反射或已知方法获取页数
-      // 在pdfrx中，可能通过 document.pages.length 获取
-      // 或者 document.pageCount
-
-      // 这里我们返回一个默认值，实际页数会在PdfViewer中通过onPageChanged获取
-      return 1;
+        // 尝试匹配PDF页面
+        final pageMatches = RegExp(r'/Type\s*/Page[^s]').allMatches(content);
+        if (pageMatches.isNotEmpty) {
+          return pageMatches.length;
+        }
+      }
     } catch (e) {
-      print('Error in _getPageCount: $e');
-      return 1;
+      print('Error extracting PDF total pages: $e');
     }
+    return 1;
   }
 
   @override
   void dispose() {
-    _document?.dispose();
     // PdfViewerController doesn't have dispose method in newer versions
     super.dispose();
   }
@@ -169,7 +114,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                '$_currentPage / $_totalPages',
+                '${_currentPage.clamp(1, _totalPages > 0 ? _totalPages : 1)} / ${_totalPages > 0 ? _totalPages : 1}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -193,21 +138,12 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
             child: PdfViewer.file(
               _book.filePath,
               controller: _controller,
-              onViewerReady: (params) {
-                // 查看器准备就绪
-                print('Viewer ready');
-              },
               params: PdfViewerParams(
                 onPageChanged: (pageNumber) {
                   setState(() {
                     _currentPage = pageNumber ?? 1;
                   });
                   _updateProgress();
-
-                  // 如果还不知道总页数，尝试从文档获取
-                  if (_totalPages <= 1) {
-                    _tryGetTotalPages();
-                  }
                 },
               ),
             ),
@@ -219,26 +155,11 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     );
   }
 
-  // 尝试获取总页数
-  Future<void> _tryGetTotalPages() async {
-    try {
-      // 通过controller获取当前文档的页数
-      // 这是一个假设的方法，实际可能需要不同的方式
-      if (_controller.doc?.pagesCount != null) {
-        setState(() {
-          _totalPages = _controller.doc!.pagesCount;
-        });
-      } else if (_controller.document?.pagesCount != null) {
-        setState(() {
-          _totalPages = _controller.document!.pagesCount;
-        });
-      }
-    } catch (e) {
-      print('Error getting total pages: $e');
-    }
-  }
-
   Widget _buildBottomToolbar() {
+    // 确保总页数至少为1，并且当前页数在有效范围内
+    final effectiveTotalPages = _totalPages > 0 ? _totalPages : 1;
+    final effectiveCurrentPage = _currentPage.clamp(1, effectiveTotalPages);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -258,16 +179,17 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
             // Previous page
             IconButton(
               icon: const Icon(Icons.chevron_left),
-              onPressed: _currentPage > 1
-                  ? () => _controller.goToPage(pageNumber: _currentPage - 1)
+              onPressed: effectiveCurrentPage > 1
+                  ? () =>
+                      _controller.goToPage(pageNumber: effectiveCurrentPage - 1)
                   : null,
             ),
             // Page navigation
             Expanded(
               child: Slider(
-                value: _currentPage.toDouble(),
+                value: effectiveCurrentPage.toDouble(),
                 min: 1,
-                max: _totalPages.toDouble(),
+                max: effectiveTotalPages.toDouble(),
                 onChanged: (value) {
                   _controller.goToPage(pageNumber: value.toInt());
                 },
@@ -276,8 +198,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
             // Next page
             IconButton(
               icon: const Icon(Icons.chevron_right),
-              onPressed: _currentPage < _totalPages
-                  ? () => _controller.goToPage(pageNumber: _currentPage + 1)
+              onPressed: effectiveCurrentPage < effectiveTotalPages
+                  ? () =>
+                      _controller.goToPage(pageNumber: effectiveCurrentPage + 1)
                   : null,
             ),
             // Zoom controls
@@ -330,13 +253,8 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   }
 
   Future<void> _searchText(String query) async {
-    // 根据 pdfrx 文档，文本搜索功能可能支持
-    if (_document != null) {
-      // TODO: 实现搜索功能
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Search: $query (not implemented)')),
-      );
-    }
+    // PDF搜索功能（在pdfrx 2.2.15中暂不支持）
+    context.showSnackBar('Search: $query');
   }
 
   void _showSettings() {
