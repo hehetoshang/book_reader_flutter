@@ -38,16 +38,16 @@ class AboutScreen extends StatelessWidget {
             Text(
               AppConstants.appName,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             // Version
             Text(
               'Version ${AppConstants.appVersion}',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey,
-              ),
+                    color: Colors.grey,
+                  ),
             ),
             const SizedBox(height: 16),
             // Description
@@ -62,7 +62,8 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 48),
             // Features
             _buildFeatureItem(context, Icons.phone_android, 'Mobile Support'),
-            _buildFeatureItem(context, Icons.desktop_windows, 'Desktop Support'),
+            _buildFeatureItem(
+                context, Icons.desktop_windows, 'Desktop Support'),
             _buildFeatureItem(context, Icons.language, 'Web Support'),
             _buildFeatureItem(context, Icons.picture_as_pdf, 'PDF Reader'),
             _buildFeatureItem(context, Icons.menu_book, 'EPUB Reader'),
@@ -71,15 +72,15 @@ class AboutScreen extends StatelessWidget {
             Text(
               '© 2024 ${AppConstants.appName}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
-              ),
+                    color: Colors.grey,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'All rights reserved',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
-              ),
+                    color: Colors.grey,
+                  ),
             ),
           ],
         ),

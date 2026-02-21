@@ -34,6 +34,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.shelfTitle),
+        centerTitle: false,
         actions: [
           // Search button
           IconButton(

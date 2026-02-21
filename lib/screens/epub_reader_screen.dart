@@ -108,23 +108,24 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
                     const SizedBox(height: 24),
                     Text(
                       'EPUB Reader',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: _getTextColor(),
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: _getTextColor(),
+                              ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Coming soon with flutter_epub_viewer',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: _getTextColor().withValues(alpha: 0.7),
-                      ),
+                            color: _getTextColor().withValues(alpha: 0.7),
+                          ),
                     ),
                     const SizedBox(height: 32),
                     Text(
                       _book.title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: _getTextColor(),
-                      ),
+                            color: _getTextColor(),
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     if (_book.author.isNotEmpty) ...[
@@ -132,8 +133,8 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
                       Text(
                         'by ${_book.author}',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: _getTextColor().withValues(alpha: 0.8),
-                        ),
+                              color: _getTextColor().withValues(alpha: 0.8),
+                            ),
                       ),
                     ],
                   ],
@@ -242,7 +243,8 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
           decoration: const InputDecoration(
             hintText: 'Bookmark title',
           ),
-          controller: TextEditingController(text: 'Page at ${(_progress * 100).toStringAsFixed(0)}%'),
+          controller: TextEditingController(
+              text: 'Page at ${(_progress * 100).toStringAsFixed(0)}%'),
         ),
         actions: [
           TextButton(
