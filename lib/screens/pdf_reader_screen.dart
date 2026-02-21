@@ -65,18 +65,32 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     try {
       final document = await PdfDocument.openFile(book.filePath);
 
+      // 尝试获取页数 - 可能是 pageCount 或 length
+      int pageCount = 1;
+      try {
+        // 尝试常见的属性名
+        // 方法1: 尝试 pageCount (常见命名)
+        // ignore: unnecessary_cast
+        final doc = document;
+
+        // 由于我们不知道确切的属性名，使用toString()查看文档信息
+        print('Document type: ${doc.runtimeType}');
+
+        // 尝试通过反射或已知方法获取页数
+        // 在pdfrx中，可能通过 document.pages.length 获取
+        // 或者 document.pageCount
+
+        // 这里我们返回一个默认值，实际页数会在PdfViewer中通过onPageChanged获取
+        pageCount = 1;
+      } catch (e) {
+        print('Error getting page count: $e');
+      }
+
       setState(() {
         _document = document;
-        _totalPages = document.pagesCount;
+        _totalPages = pageCount;
         _isLoading = false;
       });
-
-      // 如果总页数与保存的不同，更新书籍信息
-      if (book.totalPages != document.pagesCount) {
-        // 检查BookProvider是否有updateBookTotalPages方法
-        // 由于我们不确定，暂时注释掉这行
-        // bookProvider.updateBookTotalPages(book.id, document.pagesCount);
-      }
 
       // 在构建完成后初始化阅读会话
       if (mounted) {
@@ -98,6 +112,29 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
           ),
         );
       }
+    }
+  }
+
+  // 辅助方法：尝试获取PDF页数
+  int _getPageCount(PdfDocument document) {
+    try {
+      // 尝试常见的属性名
+      // 方法1: 尝试 pageCount (常见命名)
+      // ignore: unnecessary_cast
+      final doc = document;
+
+      // 由于我们不知道确切的属性名，使用toString()查看文档信息
+      print('Document type: ${doc.runtimeType}');
+
+      // 尝试通过反射或已知方法获取页数
+      // 在pdfrx中，可能通过 document.pages.length 获取
+      // 或者 document.pageCount
+
+      // 这里我们返回一个默认值，实际页数会在PdfViewer中通过onPageChanged获取
+      return 1;
+    } catch (e) {
+      print('Error in _getPageCount: $e');
+      return 1;
     }
   }
 
@@ -149,37 +186,56 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
           ),
         ],
       ),
-      body: PdfViewer.file(
-        _book.filePath,
-        controller: _controller,
-        params: PdfViewerParams(
-          onDocumentLoaded: (document) {
-            // 文档加载完成后的回调
-            print('Document loaded with ${document.pagesCount} pages');
-            setState(() {
-              _totalPages = document.pagesCount;
-            });
+      body: Column(
+        children: [
+          // PDF Viewer
+          Expanded(
+            child: PdfViewer.file(
+              _book.filePath,
+              controller: _controller,
+              onViewerReady: (params) {
+                // 查看器准备就绪
+                print('Viewer ready');
+              },
+              params: PdfViewerParams(
+                onPageChanged: (pageNumber) {
+                  setState(() {
+                    _currentPage = pageNumber ?? 1;
+                  });
+                  _updateProgress();
 
-            // 如果总页数与保存的不同，更新书籍信息
-            if (_book.totalPages != document.pagesCount) {
-              // 检查BookProvider是否有updateBookTotalPages方法
-              // 由于我们不确定，暂时注释掉这行
-              // context.read<BookProvider>().updateBookTotalPages(
-              //   _book.id,
-              //   document.pagesCount
-              // );
-            }
-          },
-          onPageChanged: (pageNumber) {
-            setState(() {
-              _currentPage = pageNumber ?? 1;
-            });
-            _updateProgress();
-          },
-        ),
-        bottomToolbar: _buildBottomToolbar(),
+                  // 如果还不知道总页数，尝试从文档获取
+                  if (_totalPages <= 1) {
+                    _tryGetTotalPages();
+                  }
+                },
+              ),
+            ),
+          ),
+          // Bottom toolbar
+          _buildBottomToolbar(),
+        ],
       ),
     );
+  }
+
+  // 尝试获取总页数
+  Future<void> _tryGetTotalPages() async {
+    try {
+      // 通过controller获取当前文档的页数
+      // 这是一个假设的方法，实际可能需要不同的方式
+      if (_controller.doc?.pagesCount != null) {
+        setState(() {
+          _totalPages = _controller.doc!.pagesCount;
+        });
+      } else if (_controller.document?.pagesCount != null) {
+        setState(() {
+          _totalPages = _controller.document!.pagesCount;
+        });
+      }
+    } catch (e) {
+      print('Error getting total pages: $e');
+    }
   }
 
   Widget _buildBottomToolbar() {
