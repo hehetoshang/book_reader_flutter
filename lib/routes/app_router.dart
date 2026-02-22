@@ -53,6 +53,20 @@ class AppRouter {
         name: 'about',
         builder: (context, state) => const AboutScreen(),
       ),
+
+      // PDF Settings Route
+      GoRoute(
+        path: '/pdf-settings',
+        name: 'pdf_settings',
+        builder: (context, state) => const PdfSettingsScreen(),
+      ),
+
+      // EPUB Settings Route
+      GoRoute(
+        path: '/epub-settings',
+        name: 'epub_settings',
+        builder: (context, state) => const EpubSettingsScreen(),
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -91,20 +105,20 @@ class AppRouter {
   }
 
   static void goToPdfReader(BuildContext context, String bookId) {
-    context.go('/pdf/$bookId');
+    context.push('/pdf/$bookId');
   }
 
   static void goToEpubReader(BuildContext context, String bookId) {
-    context.go('/epub/$bookId');
+    context.push('/epub/$bookId');
   }
 
   static void goToReader(BuildContext context, Book book) {
     switch (book.fileType) {
       case BookFileType.pdf:
-        goToPdfReader(context, book.id);
+        context.push('/pdf/${book.id}');
         break;
       case BookFileType.epub:
-        goToEpubReader(context, book.id);
+        context.push('/epub/${book.id}');
         break;
     }
   }
@@ -115,6 +129,14 @@ class AppRouter {
 
   static void goToAbout(BuildContext context) {
     context.go('/about');
+  }
+
+  static void goToPdfSettings(BuildContext context) {
+    context.go('/pdf-settings');
+  }
+
+  static void goToEpubSettings(BuildContext context) {
+    context.go('/epub-settings');
   }
 
   static void goBack(BuildContext context) {
@@ -132,6 +154,8 @@ class RouteNames {
   static const String pdfReader = 'pdf_reader';
   static const String epubReader = 'epub_reader';
   static const String settings = 'settings';
+  static const String pdfSettings = 'pdf_settings';
+  static const String epubSettings = 'epub_settings';
   static const String about = 'about';
 }
 
@@ -141,5 +165,7 @@ class RoutePaths {
   static const String pdfReader = '/pdf/:bookId';
   static const String epubReader = '/epub/:bookId';
   static const String settings = '/settings';
+  static const String pdfSettings = '/pdf-settings';
+  static const String epubSettings = '/epub-settings';
   static const String about = '/about';
 }

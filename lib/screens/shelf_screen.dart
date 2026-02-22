@@ -6,6 +6,7 @@ import '../routes/app_router.dart';
 import '../services/services.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
+import '../l10n/app_localizations.dart';
 
 class ShelfScreen extends StatefulWidget {
   const ShelfScreen({super.key});
@@ -31,9 +32,10 @@ class _ShelfScreenState extends State<ShelfScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.shelfTitle),
+        title: Text(l10n.bookshelf),
         centerTitle: false,
         actions: [
           // Search button
@@ -61,7 +63,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _importBooks,
         icon: const Icon(Icons.add),
-        label: const Text(AppStrings.importBooks),
+        label: Text(l10n.openFile),
       ),
     );
   }
@@ -105,6 +107,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -116,14 +119,14 @@ class _ShelfScreenState extends State<ShelfScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            AppStrings.emptyShelf,
+            l10n.noBooks,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.grey[600],
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            AppStrings.emptyShelfSubtitle,
+            l10n.addYourFirstBook,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),
@@ -132,7 +135,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
           ElevatedButton.icon(
             onPressed: _importBooks,
             icon: const Icon(Icons.add),
-            label: const Text(AppStrings.importBooks),
+            label: Text(l10n.openFile),
           ),
         ],
       ),
@@ -212,6 +215,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
   }
 
   void _showBookOptions(Book book) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) => BookOptionsSheet(
@@ -231,14 +235,14 @@ class _ShelfScreenState extends State<ShelfScreen> {
         onDelete: () async {
           Navigator.pop(context);
           final confirmed = await context.showConfirmDialog(
-            title: AppStrings.deleteBook,
-            content: AppStrings.deleteBookConfirm,
+            title: l10n.delete,
+            content: l10n.deleteBookConfirm,
             isDangerous: true,
           );
           if (confirmed == true) {
             await context.read<BookProvider>().deleteBook(book.id);
             if (mounted) {
-              context.showSnackBar('Book deleted');
+              context.showSnackBar(l10n.bookDeleted);
             }
           }
         },

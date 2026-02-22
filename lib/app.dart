@@ -1,36 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'l10n/app_localizations.dart';
 import 'models/models.dart';
 import 'providers/providers.dart';
 import 'routes/app_router.dart';
 import 'services/services.dart';
 import 'utils/utils.dart';
 
-class UniversalReaderApp extends StatelessWidget {
+class UniversalReaderApp extends StatefulWidget {
   const UniversalReaderApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => BookProvider()),
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        ChangeNotifierProvider(create: (_) => ReadingProvider()),
-      ],
-      child: const _AppContent(),
-    );
-  }
+  State<UniversalReaderApp> createState() => _UniversalReaderAppState();
 }
 
-class _AppContent extends StatefulWidget {
-  const _AppContent();
-
-  @override
-  State<_AppContent> createState() => _AppContentState();
-}
-
-class _AppContentState extends State<_AppContent> {
+class _UniversalReaderAppState extends State<UniversalReaderApp> {
   bool _isLoading = true;
   String? _error;
   late final SettingsProvider _settingsProvider;
@@ -39,9 +24,11 @@ class _AppContentState extends State<_AppContent> {
   @override
   void initState() {
     super.initState();
-    _settingsProvider = context.read<SettingsProvider>();
-    _bookProvider = context.read<BookProvider>();
-    _initializeApp();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _settingsProvider = context.read<SettingsProvider>();
+      _bookProvider = context.read<BookProvider>();
+      _initializeApp();
+    });
   }
 
   Future<void> _initializeApp() async {
@@ -137,6 +124,7 @@ class _AppContentState extends State<_AppContent> {
 
           // Localization
           localizationsDelegates: const [
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
@@ -163,5 +151,21 @@ class _AppContentState extends State<_AppContent> {
       case AppThemeMode.system:
         return ThemeMode.system;
     }
+  }
+}
+
+class UniversalReaderAppWrapper extends StatelessWidget {
+  const UniversalReaderAppWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => BookProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => ReadingProvider()),
+      ],
+      child: const UniversalReaderApp(),
+    );
   }
 }

@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:katbook_epub_reader/katbook_epub_reader.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../routes/app_router.dart';
@@ -20,11 +22,16 @@ class EpubReaderScreen extends StatefulWidget {
 class _EpubReaderScreenState extends State<EpubReaderScreen> {
   late Book _book;
   bool _isLoading = true;
+  String? _error;
   double _progress = 0.0;
+  late KatbookEpubController _controller;
+  final GlobalKey<KatbookEpubReaderState> _readerKey =
+      GlobalKey<KatbookEpubReaderState>();
 
   @override
   void initState() {
     super.initState();
+    _controller = KatbookEpubController();
     _loadBook();
   }
 
@@ -42,180 +49,171 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
 
     setState(() {
       _book = book;
-      _isLoading = false;
+      _isLoading = true;
+      _error = null;
     });
 
-    // Initialize reading session
-    await context.read<ReadingProvider>().startReading(book);
+    try {
+      // Load EPUB file from the actual file path
+      final file = File(book.filePath);
+      if (!file.existsSync()) {
+        throw Exception('EPUB file does not exist: ${book.filePath}');
+      }
+
+      final epubBytes = await file.readAsBytes();
+
+      if (epubBytes.isEmpty) {
+        throw Exception('Failed to load EPUB file: Empty file');
+      }
+
+      debugPrint(
+          'Loaded EPUB file: ${book.filePath}, size: ${epubBytes.length} bytes');
+
+      final success = await _controller.openBook(epubBytes);
+      if (!success) {
+        throw Exception(_controller.loadingError ?? 'Failed to parse EPUB');
+      }
+
+      // Initialize reading session
+      await context.read<ReadingProvider>().startReading(book);
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Error loading EPUB: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(_book.title),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              context.read<ReadingProvider>().endReading();
+              AppRouter.goBack(context);
+            },
+          ),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Loading EPUB...'),
+            ],
+          ),
+        ),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_book.title),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.read<ReadingProvider>().endReading();
-            AppRouter.goBack(context);
-          },
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(_book.title),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              context.read<ReadingProvider>().endReading();
+              AppRouter.goBack(context);
+            },
+          ),
         ),
-        actions: [
-          // Progress indicator
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                '${(_progress * 100).toStringAsFixed(1)}%',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-          ),
-          // Bookmarks button
-          IconButton(
-            icon: const Icon(Icons.bookmark_border),
-            onPressed: _showBookmarks,
-          ),
-          // Settings button
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _showSettings,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // EPUB content placeholder
-          Expanded(
-            child: Container(
-              color: _getBackgroundColor(),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.book_outlined,
-                      size: 100,
-                      color: _getTextColor().withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'EPUB Reader',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: _getTextColor(),
-                              ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Coming soon with flutter_epub_viewer',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: _getTextColor().withValues(alpha: 0.7),
-                          ),
-                    ),
-                    const SizedBox(height: 32),
-                    Text(
-                      _book.title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: _getTextColor(),
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (_book.author.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'by ${_book.author}',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: _getTextColor().withValues(alpha: 0.8),
-                            ),
-                      ),
-                    ],
-                  ],
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Error loading EPUB',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(_error!, textAlign: TextAlign.center),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _loadBook,
+                  child: const Text('Try Again'),
+                ),
+              ],
             ),
           ),
-          // Bottom toolbar
-          _buildBottomToolbar(),
-        ],
-      ),
-    );
-  }
+        ),
+      );
+    }
 
-  Color _getBackgroundColor() {
-    final theme = context.read<SettingsProvider>().epubTheme;
-    return switch (theme) {
-      EpubTheme.light => AppColors.epubLightBackground,
-      EpubTheme.dark => AppColors.epubDarkBackground,
-      EpubTheme.sepia => AppColors.epubSepiaBackground,
+    // Convert app theme to reader theme
+    final readerTheme = switch (settings.epubTheme) {
+      EpubTheme.light => ReaderTheme.light,
+      EpubTheme.dark => ReaderTheme.dark,
+      EpubTheme.sepia => ReaderTheme.sepia,
     };
-  }
 
-  Color _getTextColor() {
-    final theme = context.read<SettingsProvider>().epubTheme;
-    return switch (theme) {
-      EpubTheme.light => AppColors.epubLightText,
-      EpubTheme.dark => AppColors.epubDarkText,
-      EpubTheme.sepia => AppColors.epubSepiaText,
-    };
-  }
+    return Scaffold(
+      body: WillPopScope(
+        onWillPop: () async {
+          // 处理系统返回按钮事件
+          context.read<ReadingProvider>().endReading();
+          return true;
+        },
+        child: KatbookEpubReader(
+          key: _readerKey,
+          controller: _controller,
 
-  Widget _buildBottomToolbar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // Previous chapter
-            IconButton(
-              icon: const Icon(Icons.skip_previous),
-              onPressed: () {
-                // Previous chapter
-              },
-            ),
-            // Progress slider
-            Expanded(
-              child: Slider(
-                value: _progress,
-                onChanged: (value) {
-                  setState(() {
-                    _progress = value;
-                  });
-                  _updateProgress();
-                },
-              ),
-            ),
-            // Next chapter
-            IconButton(
-              icon: const Icon(Icons.skip_next),
-              onPressed: () {
-                // Next chapter
-              },
-            ),
-            // Add bookmark
-            IconButton(
-              icon: const Icon(Icons.bookmark_add),
-              onPressed: _addBookmark,
-            ),
-          ],
+          // Theme and font settings
+          initialTheme: readerTheme,
+          initialFontSize: settings.epubFontSize,
+
+          // Layout settings
+          contentWidthPercent: 0.70,
+          showAppBar: true,
+
+          // Callbacks for tracking
+          onPositionChanged: (position) {
+            setState(() {
+              _progress = position.progressPercent / 100;
+            });
+            _updateProgress();
+
+            // 更新阅读进度
+            context.read<ReadingProvider>().updateEpubChapter(
+                  position.chapterTitle ?? '',
+                  chapterIndex: position.chapterIndex,
+                );
+
+            debugPrint(
+                '📖 Position: Chapter ${position.chapterIndex}, Paragraph ${position.paragraphIndex}/${position.totalParagraphs}, Progress: ${position.progressPercent.toStringAsFixed(1)}%');
+          },
+          onProgressChanged: (progress) {
+            setState(() {
+              _progress = progress;
+            });
+            _updateProgress();
+            debugPrint('📊 Progress: ${(progress * 100).toStringAsFixed(1)}%');
+          },
+          onChapterChanged: (chapter) {
+            debugPrint(
+                '📑 Chapter: ${chapter.title} (Depth: ${chapter.depth})');
+          },
         ),
       ),
     );
@@ -230,36 +228,6 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     showModalBottomSheet(
       context: context,
       builder: (context) => const BookmarksSheet(),
-    );
-  }
-
-  void _addBookmark() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Bookmark'),
-        content: TextField(
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Bookmark title',
-          ),
-          controller: TextEditingController(
-              text: 'Page at ${(_progress * 100).toStringAsFixed(0)}%'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.showSnackBar('Bookmark added');
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
     );
   }
 

@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import '../routes/app_router.dart';
 import '../utils/utils.dart';
+import '../l10n/app_localizations.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.about),
+        title: Text(l10n.about),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => AppRouter.goBack(context),
@@ -54,7 +56,7 @@ class AboutScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                AppConstants.appDescription,
+                l10n.description,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -65,8 +67,8 @@ class AboutScreen extends StatelessWidget {
             _buildFeatureItem(
                 context, Icons.desktop_windows, 'Desktop Support'),
             _buildFeatureItem(context, Icons.language, 'Web Support'),
-            _buildFeatureItem(context, Icons.picture_as_pdf, 'PDF Reader'),
-            _buildFeatureItem(context, Icons.menu_book, 'EPUB Reader'),
+            _buildFeatureItem(context, Icons.picture_as_pdf, l10n.pdfReader),
+            _buildFeatureItem(context, Icons.menu_book, l10n.epubReader),
             const SizedBox(height: 48),
             // Copyright
             Text(

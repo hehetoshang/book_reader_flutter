@@ -4,15 +4,17 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../routes/app_router.dart';
 import '../utils/utils.dart';
+import '../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.settings),
+        title: Text(l10n.settings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => AppRouter.goBack(context),
@@ -21,54 +23,54 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         children: [
           // Appearance Section
-          _buildSectionHeader(context, AppStrings.appearance),
+          _buildSectionHeader(context, l10n.appearance),
           _buildThemeTile(context),
           _buildLanguageTile(context),
           
           const Divider(),
           
           // PDF Settings Section
-          _buildSectionHeader(context, AppStrings.pdfSettings),
+          _buildSectionHeader(context, l10n.pdfSettings),
           ListTile(
             leading: const Icon(Icons.picture_as_pdf),
-            title: const Text('PDF Reader Options'),
+            title: Text(l10n.pdfReaderOptions),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // Navigate to PDF settings
+              AppRouter.goToPdfSettings(context);
             },
           ),
           
           const Divider(),
           
           // EPUB Settings Section
-          _buildSectionHeader(context, AppStrings.epubSettings),
+          _buildSectionHeader(context, l10n.epubSettings),
           ListTile(
             leading: const Icon(Icons.menu_book),
-            title: const Text('EPUB Reader Options'),
+            title: Text(l10n.epubReaderOptions),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // Navigate to EPUB settings
+              AppRouter.goToEpubSettings(context);
             },
           ),
           
           const Divider(),
           
           // Data Management Section
-          _buildSectionHeader(context, AppStrings.dataManagement),
+          _buildSectionHeader(context, l10n.dataManagement),
           ListTile(
             leading: const Icon(Icons.download),
-            title: const Text(AppStrings.exportData),
+            title: Text(l10n.exportData),
             onTap: () => _exportData(context),
           ),
           ListTile(
             leading: const Icon(Icons.upload),
-            title: const Text(AppStrings.importData),
+            title: Text(l10n.importData),
             onTap: () => _importData(context),
           ),
           ListTile(
             leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text(
-              'Clear All Data',
+            title: Text(
+              l10n.clearAllData,
               style: TextStyle(color: Colors.red),
             ),
             onTap: () => _clearAllData(context),
@@ -77,15 +79,15 @@ class SettingsScreen extends StatelessWidget {
           const Divider(),
           
           // About Section
-          _buildSectionHeader(context, AppStrings.about),
+          _buildSectionHeader(context, l10n.about),
           ListTile(
             leading: const Icon(Icons.info),
-            title: const Text(AppStrings.version),
+            title: Text(l10n.version),
             subtitle: const Text(AppConstants.appVersion),
           ),
           ListTile(
             leading: const Icon(Icons.description),
-            title: const Text(AppStrings.openSourceLicenses),
+            title: Text(l10n.openSourceLicenses),
             onTap: () {
               showLicensePage(
                 context: context,
@@ -96,7 +98,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About ${AppConstants.appName}'),
+            title: Text(l10n.aboutApp(AppConstants.appName)),
             onTap: () => AppRouter.goToAbout(context),
           ),
         ],
@@ -118,27 +120,28 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildThemeTile(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
         return ListTile(
           leading: const Icon(Icons.brightness_medium),
-          title: const Text(AppStrings.themeMode),
-          subtitle: Text(_getThemeModeName(settings.themeMode)),
+          title: Text(l10n.theme),
+          subtitle: Text(_getThemeModeName(context, settings.themeMode)),
           trailing: DropdownButton<AppThemeMode>(
             value: settings.themeMode,
             underline: const SizedBox(),
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: AppThemeMode.light,
-                child: Text(AppStrings.light),
+                child: Text(l10n.light),
               ),
               DropdownMenuItem(
                 value: AppThemeMode.dark,
-                child: Text(AppStrings.dark),
+                child: Text(l10n.dark),
               ),
               DropdownMenuItem(
                 value: AppThemeMode.system,
-                child: Text(AppStrings.system),
+                child: Text(l10n.system),
               ),
             ],
             onChanged: (value) {
@@ -153,25 +156,26 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildLanguageTile(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
         return ListTile(
           leading: const Icon(Icons.language),
-          title: const Text(AppStrings.language),
+          title: Text(l10n.language),
           subtitle: Text(settings.languageCode == 'zh' 
-              ? AppStrings.chinese 
-              : AppStrings.english),
+              ? l10n.languageChinese 
+              : l10n.languageEnglish),
           trailing: DropdownButton<String>(
             value: settings.languageCode,
             underline: const SizedBox(),
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: 'zh',
-                child: Text(AppStrings.chinese),
+                child: Text(l10n.languageChinese),
               ),
               DropdownMenuItem(
                 value: 'en',
-                child: Text(AppStrings.english),
+                child: Text(l10n.languageEnglish),
               ),
             ],
             onChanged: (value) {
@@ -185,48 +189,52 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  String _getThemeModeName(AppThemeMode mode) {
+  String _getThemeModeName(BuildContext context, AppThemeMode mode) {
+    final l10n = AppLocalizations.of(context)!;
     switch (mode) {
       case AppThemeMode.light:
-        return AppStrings.light;
+        return l10n.light;
       case AppThemeMode.dark:
-        return AppStrings.dark;
+        return l10n.dark;
       case AppThemeMode.system:
-        return AppStrings.system;
+        return l10n.system;
     }
   }
 
   Future<void> _exportData(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       // TODO: Implement data export
-      context.showSnackBar('Data export coming soon');
+      context.showSnackBar(l10n.dataExportComingSoon);
     } catch (e) {
-      context.showErrorSnackBar('Failed to export data: $e');
+      context.showErrorSnackBar(l10n.failedToExportData(e.toString()));
     }
   }
 
   Future<void> _importData(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       // TODO: Implement data import
-      context.showSnackBar('Data import coming soon');
+      context.showSnackBar(l10n.dataImportComingSoon);
     } catch (e) {
-      context.showErrorSnackBar('Failed to import data: $e');
+      context.showErrorSnackBar(l10n.failedToImportData(e.toString()));
     }
   }
 
   Future<void> _clearAllData(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await context.showConfirmDialog(
-      title: 'Clear All Data',
-      content: 'This will delete all books and reading progress. This action cannot be undone.',
+      title: l10n.clearAllData,
+      content: l10n.clearAllDataConfirm,
       isDangerous: true,
     );
 
     if (confirmed == true) {
       try {
         await context.read<BookProvider>().deleteAllBooks();
-        context.showSnackBar('All data cleared');
+        context.showSnackBar(l10n.allDataCleared);
       } catch (e) {
-        context.showErrorSnackBar('Failed to clear data: $e');
+        context.showErrorSnackBar(l10n.failedToClearData(e.toString()));
       }
     }
   }
