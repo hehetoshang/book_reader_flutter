@@ -19,6 +19,9 @@ class ReadingProgress extends HiveObject {
   @HiveField(3)
   int? totalPages;
 
+  @HiveField(12)
+  double? pdfZoom;
+
   // EPUB specific fields
   @HiveField(4)
   String? currentChapter;
@@ -58,6 +61,7 @@ class ReadingProgress extends HiveObject {
     required this.updatedAt,
     this.bookmarks = const [],
     this.notes = const [],
+    this.pdfZoom,
   });
 
   ReadingProgress copyWith({
@@ -73,6 +77,7 @@ class ReadingProgress extends HiveObject {
     DateTime? updatedAt,
     List<Bookmark>? bookmarks,
     List<Note>? notes,
+    double? pdfZoom,
   }) {
     return ReadingProgress(
       bookId: bookId ?? this.bookId,
@@ -87,6 +92,7 @@ class ReadingProgress extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
       bookmarks: bookmarks ?? this.bookmarks,
       notes: notes ?? this.notes,
+      pdfZoom: pdfZoom ?? this.pdfZoom,
     );
   }
 

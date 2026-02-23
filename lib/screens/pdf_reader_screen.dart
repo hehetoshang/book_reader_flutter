@@ -1,12 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../routes/app_router.dart';
+import '../services/services.dart';
 import '../utils/utils.dart';
 
 class PdfReaderScreen extends StatefulWidget {
@@ -29,9 +28,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   bool _isLoading = true;
   int _currentPage = 1;
   int _totalPages = 1;
-  bool _isDocumentLoaded = true; // 添加文档加载标志
-  bool _hasAttemptedJump = false; // 标记是否已尝试跳转
-  bool _isTocVisible = false; // 目录是否可见
+  bool _hasAttemptedJump = false;
+  bool _hasAttemptedRestoreZoom = false;
+  double? _savedZoom;
 
   @override
   void initState() {
@@ -51,39 +50,36 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       return;
     }
 
-    // 初始化总页数（如果Book对象中有）
+    // 初始化总页数
     int totalPages = 1;
     if (book.totalPages != null && book.totalPages! > 1) {
       totalPages = book.totalPages!;
     }
 
-    // 先更新UI状态
+    // 直接从 StorageService 获取保存的缩放值
+    final storageService = StorageService();
+    final progress = storageService.getReadingProgress(book.id);
+    _savedZoom = progress?.pdfZoom;
+
     setState(() {
       _book = book;
       _totalPages = totalPages;
       _isLoading = false;
     });
 
-    // 延迟初始化阅读会话，确保在构建完成后再调用
+    // 延迟初始化阅读会话
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await context.read<ReadingProvider>().startReading(book);
-        // 跳转到保存的页数的逻辑已移至onDocumentChanged回调中
       }
     });
   }
 
   @override
   void dispose() {
-    // 释放focus node
     _focusNode.dispose();
-    // PdfViewerController doesn't have dispose method in newer versions
     super.dispose();
   }
-
-  // 定义自定义Intent类
-  static const _previousPageIntent = _PreviousPageIntent();
-  static const _nextPageIntent = _NextPageIntent();
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +91,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        // 处理系统返回按钮事件
         context.read<ReadingProvider>().endReading();
         return true;
       },
@@ -106,7 +101,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              // 处理返回按钮事件
               context.read<ReadingProvider>().endReading();
               AppRouter.goBack(context);
             },
@@ -156,7 +150,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
             }
           },
           child: GestureDetector(
-            // 点击时重新获取焦点
             onTap: () {
               FocusScope.of(context).requestFocus(_focusNode);
             },
@@ -168,6 +161,15 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
                     _book.filePath,
                     controller: _controller,
                     params: PdfViewerParams(
+                      // 设置初始缩放 - 使用保存的缩放值
+                      calculateInitialZoom:
+                          (document, controller, fitZoom, coverZoom) {
+                        // 使用 _savedZoom（在 _loadBook 中从数据库读取）
+                        if (_savedZoom != null && _savedZoom != 1.0) {
+                          return _savedZoom!;
+                        }
+                        return fitZoom;
+                      },
                       onPageChanged: (pageNumber) {
                         setState(() {
                           _currentPage = pageNumber ?? 1;
@@ -175,16 +177,16 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
                         _updateProgress();
                       },
                       onDocumentChanged: (document) {
-                        // 获取总页数
                         if (document != null) {
                           setState(() {
                             _totalPages = document.pages.length;
-                            _isDocumentLoaded = true;
                           });
-
-                          // 文档加载完成后，执行跳转
                           _jumpToSavedPage();
                         }
+                      },
+                      // 视图准备好后的回调
+                      onViewerReady: (document, controller) {
+                        // 可以在这里添加额外的初始化逻辑
                       },
                     ),
                   ),
@@ -200,7 +202,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   }
 
   Widget _buildBottomToolbar() {
-    // 确保总页数至少为1，并且当前页数在有效范围内
     final effectiveTotalPages = _totalPages > 0 ? _totalPages : 1;
     final effectiveCurrentPage = _currentPage.clamp(1, effectiveTotalPages);
 
@@ -250,16 +251,33 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
             // Zoom controls
             IconButton(
               icon: const Icon(Icons.zoom_out),
-              onPressed: () => _controller.zoomDown(),
+              onPressed: () => _zoomDown(),
             ),
             IconButton(
               icon: const Icon(Icons.zoom_in),
-              onPressed: () => _controller.zoomUp(),
+              onPressed: () => _zoomUp(),
             ),
           ],
         ),
       ),
     );
+  }
+
+  // 缩放控制方法
+  Future<void> _zoomUp() async {
+    await _controller.zoomUp();
+    _saveCurrentZoom();
+  }
+
+  Future<void> _zoomDown() async {
+    await _controller.zoomDown();
+    _saveCurrentZoom();
+  }
+
+  void _saveCurrentZoom() {
+    if (_controller.isReady) {
+      context.read<ReadingProvider>().updatePdfZoom(_controller.currentZoom);
+    }
   }
 
   void _updateProgress() {
@@ -297,7 +315,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   }
 
   Future<void> _searchText(String query) async {
-    // PDF搜索功能（在当前pdfrx版本中暂不支持）
     context.showSnackBar('Search: $query');
   }
 
@@ -311,7 +328,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
+            child: const Text(
               'Table of Contents',
               style: TextStyle(
                 color: Colors.black,
@@ -361,7 +378,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
     for (final node in nodes) {
       treeItems.add(
-        Container(
+        SizedBox(
           width: double.infinity,
           child: Material(
             color: Colors.transparent,
@@ -418,9 +435,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     );
   }
 
-  // 新增方法：跳转到保存的页面
+  // 跳转到保存的页面
   Future<void> _jumpToSavedPage() async {
-    if (_hasAttemptedJump) return; // 防止重复跳转
+    if (_hasAttemptedJump) return;
 
     final readingProvider = context.read<ReadingProvider>();
     final savedPage = readingProvider.currentProgress?.currentPage;
@@ -428,7 +445,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     if (savedPage != null && savedPage > 1 && savedPage <= _totalPages) {
       _hasAttemptedJump = true;
 
-      // 给PDF渲染一点时间
       await Future.delayed(const Duration(milliseconds: 100));
 
       if (mounted) {

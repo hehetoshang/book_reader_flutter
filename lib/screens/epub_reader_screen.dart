@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:katbook_epub_reader/katbook_epub_reader.dart';
@@ -33,6 +34,58 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     super.initState();
     _controller = KatbookEpubController();
     _loadBook();
+
+    // 监听设置变化
+    _startListeningToSettings();
+  }
+
+  // 开始监听设置变化
+  void _startListeningToSettings() {
+    // 每1秒检查一次设置变化
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      // 检查并保存设置变化
+      _checkAndSaveSettings();
+    });
+  }
+
+  // 检查并保存设置变化
+  void _checkAndSaveSettings() {
+    final readerState = _readerKey.currentState;
+    if (readerState == null) return;
+
+    final settings = context.read<SettingsProvider>();
+
+    // 检查主题变化
+    final currentTheme = readerState.currentTheme;
+    final savedTheme = switch (settings.epubTheme) {
+      EpubTheme.light => ReaderTheme.light,
+      EpubTheme.dark => ReaderTheme.dark,
+      EpubTheme.sepia => ReaderTheme.sepia,
+    };
+
+    if (currentTheme != savedTheme) {
+      // 主题已更改，保存新设置
+      final newEpubTheme = switch (currentTheme) {
+        ReaderTheme.light => EpubTheme.light,
+        ReaderTheme.dark => EpubTheme.dark,
+        ReaderTheme.sepia => EpubTheme.sepia,
+      };
+      settings.setEpubTheme(newEpubTheme);
+      debugPrint('🎨 Theme changed to: $currentTheme');
+    }
+
+    // 检查字体大小变化
+    final currentFontSize = readerState.fontSize;
+    if ((currentFontSize - settings.epubFontSize).abs() > 0.1) {
+      // 字体大小已更改，保存新设置
+      settings.setEpubFontSize(currentFontSize);
+      debugPrint('📝 Font size changed to: $currentFontSize');
+    }
   }
 
   Future<void> _loadBook() async {
@@ -76,6 +129,11 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
 
       // Initialize reading session
       await context.read<ReadingProvider>().startReading(book);
+
+      // Jump to saved progress position
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _jumpToSavedProgress();
+      });
     } catch (e) {
       _error = e.toString();
       debugPrint('Error loading EPUB: $e');
@@ -182,6 +240,7 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
           // Theme and font settings
           initialTheme: readerTheme,
           initialFontSize: settings.epubFontSize,
+          initialReadingMode: settings.epubReadingMode,
 
           // Layout settings
           contentWidthPercent: 0.70,
@@ -214,6 +273,11 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
             debugPrint(
                 '📑 Chapter: ${chapter.title} (Depth: ${chapter.depth})');
           },
+          onReadingModeChanged: (mode) {
+            // 更新阅读模式设置
+            context.read<SettingsProvider>().setEpubReadingMode(mode);
+            debugPrint('📱 Reading mode changed to: $mode');
+          },
         ),
       ),
     );
@@ -222,6 +286,25 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
   void _updateProgress() {
     context.read<BookProvider>().updateReadingProgress(_book.id, _progress);
     context.read<ReadingProvider>().updateEpubProgress(_progress);
+  }
+
+  void _jumpToSavedProgress() {
+    final readingProvider = context.read<ReadingProvider>();
+    final progress = readingProvider.currentProgress?.progress ?? 0.0;
+
+    if (progress > 0.0 && _readerKey.currentState != null) {
+      final totalParagraphs = _controller.paragraphs.length;
+      if (totalParagraphs > 0) {
+        final targetParagraphIndex = (progress * totalParagraphs).floor();
+        final clampedIndex = targetParagraphIndex.clamp(0, totalParagraphs - 1);
+
+        debugPrint(
+            '📚 Jumping to saved progress: ${(progress * 100).toStringAsFixed(1)}%, '
+            'Paragraph $clampedIndex/$totalParagraphs');
+
+        _readerKey.currentState?.scrollToParagraph(clampedIndex);
+      }
+    }
   }
 
   void _showBookmarks() {

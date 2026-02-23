@@ -29,13 +29,14 @@ class ReadingProgressAdapter extends TypeAdapter<ReadingProgress> {
       updatedAt: fields[9] as DateTime,
       bookmarks: (fields[10] as List).cast<Bookmark>(),
       notes: (fields[11] as List).cast<Note>(),
+      pdfZoom: fields[12] as double?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ReadingProgress obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.bookId)
       ..writeByte(1)
@@ -44,6 +45,8 @@ class ReadingProgressAdapter extends TypeAdapter<ReadingProgress> {
       ..write(obj.currentPage)
       ..writeByte(3)
       ..write(obj.totalPages)
+      ..writeByte(12)
+      ..write(obj.pdfZoom)
       ..writeByte(4)
       ..write(obj.currentChapter)
       ..writeByte(5)

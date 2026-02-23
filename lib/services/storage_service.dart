@@ -12,7 +12,7 @@ class StorageService {
 
   Future<void> initialize() async {
     await Hive.initFlutter();
-    
+
     // Register adapters
     Hive.registerAdapter(BookAdapter());
     Hive.registerAdapter(BookFileTypeAdapter());
@@ -27,6 +27,7 @@ class StorageService {
     Hive.registerAdapter(EpubTextAlignAdapter());
     Hive.registerAdapter(EpubThemeAdapter());
     Hive.registerAdapter(WindowSettingsAdapter());
+    Hive.registerAdapter(ReadingModeAdapter());
 
     // Open boxes
     _booksBox = await Hive.openBox<Book>('books');
@@ -37,7 +38,8 @@ class StorageService {
   // Books
   Box<Book> get booksBox {
     if (_booksBox == null) {
-      throw StateError('StorageService not initialized. Call initialize() first.');
+      throw StateError(
+          'StorageService not initialized. Call initialize() first.');
     }
     return _booksBox!;
   }
@@ -67,7 +69,8 @@ class StorageService {
   // Reading Progress
   Box<ReadingProgress> get progressBox {
     if (_progressBox == null) {
-      throw StateError('StorageService not initialized. Call initialize() first.');
+      throw StateError(
+          'StorageService not initialized. Call initialize() first.');
     }
     return _progressBox!;
   }
@@ -87,7 +90,8 @@ class StorageService {
   // App Settings
   Box<AppSettings> get settingsBox {
     if (_settingsBox == null) {
-      throw StateError('StorageService not initialized. Call initialize() first.');
+      throw StateError(
+          'StorageService not initialized. Call initialize() first.');
     }
     return _settingsBox!;
   }
@@ -140,7 +144,8 @@ class StorageService {
     final progressData = data['reading_progress'] as List<dynamic>?;
     if (progressData != null) {
       for (final progData in progressData) {
-        final progress = _readingProgressFromMap(progData as Map<String, dynamic>);
+        final progress =
+            _readingProgressFromMap(progData as Map<String, dynamic>);
         await progressBox.put(progress.bookId, progress);
       }
     }
@@ -226,10 +231,13 @@ class StorageService {
     return AppSettings(
       themeMode: AppThemeMode.values[map['themeMode'] as int],
       languageCode: map['languageCode'] as String,
-      pdfSettings: _pdfSettingsFromMap(map['pdfSettings'] as Map<String, dynamic>),
-      epubSettings: _epubSettingsFromMap(map['epubSettings'] as Map<String, dynamic>),
+      pdfSettings:
+          _pdfSettingsFromMap(map['pdfSettings'] as Map<String, dynamic>),
+      epubSettings:
+          _epubSettingsFromMap(map['epubSettings'] as Map<String, dynamic>),
       windowSettings: map['windowSettings'] != null
-          ? _windowSettingsFromMap(map['windowSettings'] as Map<String, dynamic>)
+          ? _windowSettingsFromMap(
+              map['windowSettings'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -240,7 +248,8 @@ class StorageService {
       enableTextSelection: map['enableTextSelection'] as bool? ?? true,
       pageLayout: PdfPageLayout.values[map['pageLayout'] as int? ?? 0],
       showThumbnailSidebar: map['showThumbnailSidebar'] as bool? ?? true,
-      enableScrollByMouseWheel: map['enableScrollByMouseWheel'] as bool? ?? true,
+      enableScrollByMouseWheel:
+          map['enableScrollByMouseWheel'] as bool? ?? true,
     );
   }
 
@@ -351,9 +360,8 @@ extension AppSettingsSerialization on AppSettings {
       'languageCode': languageCode,
       'pdfSettings': _pdfSettingsToMap(pdfSettings),
       'epubSettings': _epubSettingsToMap(epubSettings),
-      'windowSettings': windowSettings != null
-          ? _windowSettingsToMap(windowSettings!)
-          : null,
+      'windowSettings':
+          windowSettings != null ? _windowSettingsToMap(windowSettings!) : null,
     };
   }
 

@@ -1,6 +1,47 @@
 import 'package:hive/hive.dart';
+import 'package:katbook_epub_reader/katbook_epub_reader.dart' show ReadingMode;
 
 part 'app_settings.g.dart';
+
+// ReadingMode adapter for Hive
+class ReadingModeAdapter extends TypeAdapter<ReadingMode> {
+  @override
+  final int typeId = 13;
+
+  @override
+  ReadingMode read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return ReadingMode.page;
+      case 1:
+        return ReadingMode.scroll;
+      default:
+        return ReadingMode.page;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, ReadingMode obj) {
+    switch (obj) {
+      case ReadingMode.page:
+        writer.writeByte(0);
+        break;
+      case ReadingMode.scroll:
+        writer.writeByte(1);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReadingModeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
 
 @HiveType(typeId: 5)
 class AppSettings extends HiveObject {
@@ -135,6 +176,9 @@ class EpubReaderSettings extends HiveObject {
   @HiveField(7)
   double topBottomPadding;
 
+  @HiveField(8)
+  ReadingMode readingMode;
+
   EpubReaderSettings({
     this.fontSize = 16.0,
     this.lineHeight = 1.5,
@@ -144,6 +188,7 @@ class EpubReaderSettings extends HiveObject {
     this.fontFamily,
     this.sidePadding = 20.0,
     this.topBottomPadding = 20.0,
+    this.readingMode = ReadingMode.page,
   });
 
   EpubReaderSettings copyWith({
@@ -155,6 +200,7 @@ class EpubReaderSettings extends HiveObject {
     String? fontFamily,
     double? sidePadding,
     double? topBottomPadding,
+    ReadingMode? readingMode,
   }) {
     return EpubReaderSettings(
       fontSize: fontSize ?? this.fontSize,
@@ -165,6 +211,7 @@ class EpubReaderSettings extends HiveObject {
       fontFamily: fontFamily ?? this.fontFamily,
       sidePadding: sidePadding ?? this.sidePadding,
       topBottomPadding: topBottomPadding ?? this.topBottomPadding,
+      readingMode: readingMode ?? this.readingMode,
     );
   }
 }

@@ -189,4 +189,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String failedToClearData(Object error) {
     return '清除数据失败: $error';
   }
+
+  @override
+  String get readingMode => '阅读模式';
+
+  @override
+  String get loading => '加载 EPUB...';
+
+  @override
+  String get errorLoading => '加载 EPUB 错误';
 }

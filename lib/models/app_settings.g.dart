@@ -117,13 +117,14 @@ class EpubReaderSettingsAdapter extends TypeAdapter<EpubReaderSettings> {
       fontFamily: fields[5] as String?,
       sidePadding: fields[6] as double,
       topBottomPadding: fields[7] as double,
+      readingMode: fields[8] as ReadingMode? ?? ReadingMode.page,
     );
   }
 
   @override
   void write(BinaryWriter writer, EpubReaderSettings obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.fontSize)
       ..writeByte(1)
@@ -139,7 +140,9 @@ class EpubReaderSettingsAdapter extends TypeAdapter<EpubReaderSettings> {
       ..writeByte(6)
       ..write(obj.sidePadding)
       ..writeByte(7)
-      ..write(obj.topBottomPadding);
+      ..write(obj.topBottomPadding)
+      ..writeByte(8)
+      ..write(obj.readingMode);
   }
 
   @override

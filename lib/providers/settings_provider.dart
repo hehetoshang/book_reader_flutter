@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show ChangeNotifier, debugPrint;
 import 'package:flutter/material.dart' show Locale, ThemeMode;
 import 'package:flutter/material.dart' as flutter;
+import 'package:katbook_epub_reader/katbook_epub_reader.dart' show ReadingMode;
 import '../models/models.dart';
 import '../services/services.dart';
 
@@ -56,6 +57,7 @@ class SettingsProvider extends ChangeNotifier {
   String? get epubFontFamily => epubSettings.fontFamily;
   double get epubSidePadding => epubSettings.sidePadding;
   double get epubTopBottomPadding => epubSettings.topBottomPadding;
+  ReadingMode get epubReadingMode => epubSettings.readingMode;
 
   // Window settings getters (desktop only)
   WindowSettings? get windowSettings => settings.windowSettings;
@@ -224,6 +226,14 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> setEpubTopBottomPadding(double padding) async {
     final updatedEpubSettings = epubSettings.copyWith(topBottomPadding: padding);
+    final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
+    _settings = updatedSettings;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> setEpubReadingMode(ReadingMode mode) async {
+    final updatedEpubSettings = epubSettings.copyWith(readingMode: mode);
     final updatedSettings = settings.copyWith(epubSettings: updatedEpubSettings);
     _settings = updatedSettings;
     await _saveSettings();

@@ -104,7 +104,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developer => 'Developer';
 
   @override
-  String get description => 'A cross-platform reader that supports PDF and EPUB formats';
+  String get description =>
+      'A cross-platform reader that supports PDF and EPUB formats';
 
   @override
   String get back => 'Back';
@@ -180,7 +181,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get clearAllDataConfirm => 'This will delete all books and reading progress. This action cannot be undone.';
+  String get clearAllDataConfirm =>
+      'This will delete all books and reading progress. This action cannot be undone.';
 
   @override
   String get allDataCleared => 'All data cleared';
@@ -189,4 +191,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String failedToClearData(Object error) {
     return 'Failed to clear data: $error';
   }
+
+  @override
+  String get readingMode => 'Reading Mode';
+
+  @override
+  String get loading => 'Loading EPUB...';
+
+  @override
+  String get errorLoading => 'Error loading EPUB';
 }

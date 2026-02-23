@@ -43,7 +43,7 @@ class ReadingProvider extends ChangeNotifier {
 
     try {
       _currentBook = book;
-      
+
       // Load existing progress or create new
       _currentProgress = _storageService.getReadingProgress(book.id);
       if (_currentProgress == null) {
@@ -57,7 +57,7 @@ class ReadingProvider extends ChangeNotifier {
       // Initialize state from progress
       if (book.fileType == BookFileType.pdf) {
         _pdfCurrentPage = _currentProgress!.currentPage ?? 1;
-        _pdfZoom = 1.0;
+        _pdfZoom = _currentProgress!.pdfZoom ?? 1.0;
       } else {
         _epubCurrentChapter = _currentProgress!.currentChapter;
       }
@@ -103,58 +103,70 @@ class ReadingProvider extends ChangeNotifier {
   // Update PDF page
   Future<void> updatePdfPage(int page) async {
     if (_currentBook?.fileType != BookFileType.pdf) return;
-    
+
     _pdfCurrentPage = page;
-    
+
     if (_currentProgress != null) {
-      final totalPages = _currentProgress!.totalPages ?? _currentBook!.totalPages ?? 1;
+      final totalPages =
+          _currentProgress!.totalPages ?? _currentBook!.totalPages ?? 1;
       final progress = totalPages > 0 ? page / totalPages : 0.0;
-      
+
       _currentProgress = _currentProgress!.copyWith(
         currentPage: page,
         progress: progress.clamp(0.0, 1.0),
       );
-      
+
       await saveProgress();
       notifyListeners();
     }
   }
 
   // Update PDF zoom
-  void updatePdfZoom(double zoom) {
+  Future<void> updatePdfZoom(double zoom) async {
+    if (_currentBook?.fileType != BookFileType.pdf) return;
+
     _pdfZoom = zoom.clamp(0.25, 5.0);
-    notifyListeners();
+
+    if (_currentProgress != null) {
+      _currentProgress = _currentProgress!.copyWith(
+        pdfZoom: _pdfZoom,
+      );
+
+      await saveProgress();
+      notifyListeners();
+    }
   }
 
   // Zoom in
-  void zoomIn() {
-    updatePdfZoom(_pdfZoom * 1.25);
+  Future<void> zoomIn() async {
+    await updatePdfZoom(_pdfZoom * 1.25);
   }
 
   // Zoom out
-  void zoomOut() {
-    updatePdfZoom(_pdfZoom / 1.25);
+  Future<void> zoomOut() async {
+    await updatePdfZoom(_pdfZoom / 1.25);
   }
 
   // Reset zoom
-  void resetZoom() {
-    _pdfZoom = 1.0;
-    notifyListeners();
+  Future<void> resetZoom() async {
+    await updatePdfZoom(1.0);
   }
 
   // Update EPUB chapter
-  Future<void> updateEpubChapter(String chapter, {int? chapterIndex, String? cfi}) async {
+  Future<void> updateEpubChapter(String chapter,
+      {int? chapterIndex, String? cfi}) async {
     if (_currentBook?.fileType != BookFileType.epub) return;
-    
+
     _epubCurrentChapter = chapter;
-    
+
     if (_currentProgress != null) {
       _currentProgress = _currentProgress!.copyWith(
         currentChapter: chapter,
-        currentChapterIndex: chapterIndex ?? _currentProgress!.currentChapterIndex,
+        currentChapterIndex:
+            chapterIndex ?? _currentProgress!.currentChapterIndex,
         cfi: cfi ?? _currentProgress!.cfi,
       );
-      
+
       await saveProgress();
       notifyListeners();
     }
@@ -163,13 +175,13 @@ class ReadingProvider extends ChangeNotifier {
   // Update EPUB progress
   Future<void> updateEpubProgress(double progress, {String? cfi}) async {
     if (_currentBook?.fileType != BookFileType.epub) return;
-    
+
     if (_currentProgress != null) {
       _currentProgress = _currentProgress!.copyWith(
         progress: progress.clamp(0.0, 1.0),
         cfi: cfi ?? _currentProgress!.cfi,
       );
-      
+
       await saveProgress();
       notifyListeners();
     }
@@ -212,7 +224,8 @@ class ReadingProvider extends ChangeNotifier {
   }
 
   // Add bookmark
-  Future<void> addBookmark(String title, String position, {int? pageNumber, String? cfi}) async {
+  Future<void> addBookmark(String title, String position,
+      {int? pageNumber, String? cfi}) async {
     if (_currentProgress == null) return;
 
     final bookmark = Bookmark(
@@ -226,7 +239,7 @@ class ReadingProvider extends ChangeNotifier {
 
     final updatedBookmarks = [..._currentProgress!.bookmarks, bookmark];
     _currentProgress = _currentProgress!.copyWith(bookmarks: updatedBookmarks);
-    
+
     await saveProgress();
     notifyListeners();
   }
@@ -235,18 +248,18 @@ class ReadingProvider extends ChangeNotifier {
   Future<void> removeBookmark(String bookmarkId) async {
     if (_currentProgress == null) return;
 
-    final updatedBookmarks = _currentProgress!.bookmarks
-        .where((b) => b.id != bookmarkId)
-        .toList();
-    
+    final updatedBookmarks =
+        _currentProgress!.bookmarks.where((b) => b.id != bookmarkId).toList();
+
     _currentProgress = _currentProgress!.copyWith(bookmarks: updatedBookmarks);
-    
+
     await saveProgress();
     notifyListeners();
   }
 
   // Add note
-  Future<void> addNote(String content, String position, {String? selectedText, int? pageNumber, String? cfi}) async {
+  Future<void> addNote(String content, String position,
+      {String? selectedText, int? pageNumber, String? cfi}) async {
     if (_currentProgress == null) return;
 
     final note = Note(
@@ -261,7 +274,7 @@ class ReadingProvider extends ChangeNotifier {
 
     final updatedNotes = [..._currentProgress!.notes, note];
     _currentProgress = _currentProgress!.copyWith(notes: updatedNotes);
-    
+
     await saveProgress();
     notifyListeners();
   }
@@ -279,9 +292,9 @@ class ReadingProvider extends ChangeNotifier {
       }
       return note;
     }).toList();
-    
+
     _currentProgress = _currentProgress!.copyWith(notes: updatedNotes);
-    
+
     await saveProgress();
     notifyListeners();
   }
@@ -290,12 +303,11 @@ class ReadingProvider extends ChangeNotifier {
   Future<void> removeNote(String noteId) async {
     if (_currentProgress == null) return;
 
-    final updatedNotes = _currentProgress!.notes
-        .where((n) => n.id != noteId)
-        .toList();
-    
+    final updatedNotes =
+        _currentProgress!.notes.where((n) => n.id != noteId).toList();
+
     _currentProgress = _currentProgress!.copyWith(notes: updatedNotes);
-    
+
     await saveProgress();
     notifyListeners();
   }
