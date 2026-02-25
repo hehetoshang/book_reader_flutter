@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:katbook_epub_reader/katbook_epub_reader.dart' as epub_reader;
 import 'package:provider/provider.dart';
 import 'l10n/app_localizations.dart';
 import 'models/models.dart';
@@ -122,9 +123,10 @@ class _UniversalReaderAppState extends State<UniversalReaderApp> {
           darkTheme: AppThemes.darkTheme,
           themeMode: _getThemeMode(settings.themeMode),
 
-          // Localization
+          // Localization - 包含项目和 EPUB 阅读器的本地化委托
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            epub_reader.AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
@@ -132,6 +134,7 @@ class _UniversalReaderAppState extends State<UniversalReaderApp> {
           supportedLocales: const [
             Locale('en'),
             Locale('zh'),
+            Locale('fr'),
           ],
           locale: settings.locale,
 

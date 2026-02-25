@@ -11,9 +11,13 @@ import '../utils/utils.dart';
 class EpubReaderScreen extends StatefulWidget {
   final String bookId;
 
+  /// 是否显示语言选择按钮
+  final bool showLanguageButton;
+
   const EpubReaderScreen({
     super.key,
     required this.bookId,
+    this.showLanguageButton = false,
   });
 
   @override
@@ -226,6 +230,9 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
       EpubTheme.sepia => ReaderTheme.sepia,
     };
 
+    // Convert app locale to reader locale
+    final readerLocale = Locale(settings.languageCode);
+
     return Scaffold(
       body: WillPopScope(
         onWillPop: () async {
@@ -245,6 +252,10 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
           // Layout settings
           contentWidthPercent: 0.70,
           showAppBar: true,
+
+          // Language settings - 使用程序总设置的语言
+          locale: readerLocale,
+          showLanguageButton: widget.showLanguageButton,
 
           // Callbacks for tracking
           onPositionChanged: (position) {
@@ -277,6 +288,11 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
             // 更新阅读模式设置
             context.read<SettingsProvider>().setEpubReadingMode(mode);
             debugPrint('📱 Reading mode changed to: $mode');
+          },
+          onLocaleChanged: (locale) {
+            // 当用户在阅读器内切换语言时，同步更新程序总设置
+            context.read<SettingsProvider>().setLanguage(locale.languageCode);
+            debugPrint('🌐 Language changed to: ${locale.languageCode}');
           },
         ),
       ),

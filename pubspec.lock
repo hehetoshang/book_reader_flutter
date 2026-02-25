@@ -472,10 +472,9 @@ packages:
   katbook_epub_reader:
     dependency: "direct main"
     description:
-      name: katbook_epub_reader
-      sha256: cf7401a6e67f9103e99d9d3f6008c282abc22aa649886cf1425441b0ff430b2f
-      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
-    source: hosted
+      path: "public/katbook_epub_reader"
+      relative: true
+    source: path
     version: "2.0.0"
   leak_tracker:
     dependency: transitive
