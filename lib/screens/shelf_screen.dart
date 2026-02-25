@@ -233,16 +233,22 @@ class _ShelfScreenState extends State<ShelfScreen> {
           context.read<BookProvider>().markAsRead(book.id, !book.isRead);
         },
         onDelete: () async {
-          Navigator.pop(context);
+          // 保存必要的引用，避免在异步操作后使用已销毁的 context
+          final bookProvider = context.read<BookProvider>();
+          final scaffoldMessenger = ScaffoldMessenger.of(context);
+          final deleteMsg = l10n.bookDeleted;
+
           final confirmed = await context.showConfirmDialog(
             title: l10n.delete,
             content: l10n.deleteBookConfirm,
             isDangerous: true,
           );
           if (confirmed == true) {
-            await context.read<BookProvider>().deleteBook(book.id);
+            await bookProvider.deleteBook(book.id);
             if (mounted) {
-              context.showSnackBar(l10n.bookDeleted);
+              scaffoldMessenger.showSnackBar(
+                SnackBar(content: Text(deleteMsg)),
+              );
             }
           }
         },

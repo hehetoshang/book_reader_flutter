@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 
 // DateTime Extensions
 extension DateTimeExtension on DateTime {
@@ -150,10 +151,11 @@ extension BuildContextExtension on BuildContext {
   Future<bool?> showConfirmDialog({
     required String title,
     required String content,
-    String confirmText = 'Confirm',
-    String cancelText = 'Cancel',
+    String? confirmText,
+    String? cancelText,
     bool isDangerous = false,
   }) {
+    final l10n = AppLocalizations.of(this)!;
     return showDialog<bool>(
       context: this,
       builder: (context) => AlertDialog(
@@ -162,14 +164,14 @@ extension BuildContextExtension on BuildContext {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(cancelText),
+            child: Text(cancelText ?? l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: isDangerous
                 ? TextButton.styleFrom(foregroundColor: Colors.red)
                 : null,
-            child: Text(confirmText),
+            child: Text(confirmText ?? l10n.confirm),
           ),
         ],
       ),

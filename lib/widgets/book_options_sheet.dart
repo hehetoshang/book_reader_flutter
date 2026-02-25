@@ -8,7 +8,7 @@ class BookOptionsSheet extends StatelessWidget {
   final VoidCallback onOpen;
   final VoidCallback onToggleFavorite;
   final VoidCallback onMarkAsRead;
-  final VoidCallback onDelete;
+  final Future<void> Function() onDelete;
 
   const BookOptionsSheet({
     super.key,
@@ -86,7 +86,10 @@ class BookOptionsSheet extends StatelessWidget {
               l10n.deleteBook,
               style: const TextStyle(color: Colors.red),
             ),
-            onTap: onDelete,
+            onTap: () async {
+              Navigator.pop(context);
+              await onDelete();
+            },
           ),
         ],
       ),

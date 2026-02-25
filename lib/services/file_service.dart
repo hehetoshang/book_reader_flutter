@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math';
+import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:xml/xml.dart';
 import '../models/models.dart';
 import 'platform_service.dart';
 
@@ -169,11 +172,93 @@ class FileService {
     final metadata = <String, dynamic>{};
 
     try {
-      // EPUB is a ZIP file containing XML files
-      // For now, return basic info
-      // TODO: Implement proper EPUB metadata extraction using epub package
-    } catch (e) {
+      // Read EPUB file as bytes
+      final file = File(filePath);
+      if (!await file.exists()) return metadata;
+
+      final bytes = await file.readAsBytes();
+
+      // Decode ZIP archive
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      // Find container.xml to get the path to content.opf
+      final containerFile = archive.findFile('META-INF/container.xml');
+      if (containerFile == null) return metadata;
+
+      final containerContent = utf8.decode(containerFile.content as List<int>);
+      final containerDoc = XmlDocument.parse(containerContent);
+
+      // Get the path to content.opf from container.xml
+      final rootfileElement = containerDoc.findAllElements('rootfile').firstOrNull;
+      if (rootfileElement == null) return metadata;
+
+      final contentOpfPath = rootfileElement.getAttribute('full-path');
+      if (contentOpfPath == null) return metadata;
+
+      // Find and parse content.opf
+      final contentOpfFile = archive.findFile(contentOpfPath);
+      if (contentOpfFile == null) return metadata;
+
+      final contentOpfContent = utf8.decode(contentOpfFile.content as List<int>);
+      final contentOpfDoc = XmlDocument.parse(contentOpfContent);
+
+      // Extract metadata from content.opf
+      final metadataElement = contentOpfDoc.findAllElements('metadata').firstOrNull;
+      if (metadataElement != null) {
+        // Extract title
+        final titleElement = metadataElement.findElements('dc:title').firstOrNull ??
+            metadataElement.findElements('title').firstOrNull;
+        if (titleElement != null && titleElement.innerText.isNotEmpty) {
+          metadata['title'] = titleElement.innerText.trim();
+        }
+
+        // Extract author (creator)
+        final creatorElement = metadataElement.findElements('dc:creator').firstOrNull ??
+            metadataElement.findElements('creator').firstOrNull;
+        if (creatorElement != null && creatorElement.innerText.isNotEmpty) {
+          metadata['author'] = creatorElement.innerText.trim();
+        }
+
+        // Extract description
+        final descriptionElement = metadataElement.findElements('dc:description').firstOrNull ??
+            metadataElement.findElements('description').firstOrNull;
+        if (descriptionElement != null && descriptionElement.innerText.isNotEmpty) {
+          metadata['description'] = descriptionElement.innerText.trim();
+        }
+
+        // Extract language
+        final languageElement = metadataElement.findElements('dc:language').firstOrNull ??
+            metadataElement.findElements('language').firstOrNull;
+        if (languageElement != null && languageElement.innerText.isNotEmpty) {
+          metadata['language'] = languageElement.innerText.trim();
+        }
+
+        // Extract publisher
+        final publisherElement = metadataElement.findElements('dc:publisher').firstOrNull ??
+            metadataElement.findElements('publisher').firstOrNull;
+        if (publisherElement != null && publisherElement.innerText.isNotEmpty) {
+          metadata['publisher'] = publisherElement.innerText.trim();
+        }
+
+        // Extract date
+        final dateElement = metadataElement.findElements('dc:date').firstOrNull ??
+            metadataElement.findElements('date').firstOrNull;
+        if (dateElement != null && dateElement.innerText.isNotEmpty) {
+          metadata['date'] = dateElement.innerText.trim();
+        }
+      }
+
+      // Try to count chapters/spine items
+      final spineElement = contentOpfDoc.findAllElements('spine').firstOrNull;
+      if (spineElement != null) {
+        final itemrefs = spineElement.findElements('itemref').toList();
+        metadata['totalPages'] = itemrefs.length;
+      }
+
+      print('📚 EPUB Metadata extracted: $metadata');
+    } catch (e, stack) {
       print('Error extracting EPUB metadata: $e');
+      print('Stack trace: $stack');
     }
 
     return metadata;

@@ -7,12 +7,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:universal_reader/app.dart';
+import 'package:book_reader_flutter/app.dart';
 
 void main() {
   testWidgets('App loads smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const UniversalReaderApp());
+    await tester.pumpWidget(const UniversalReaderAppWrapper());
 
     // Verify that the app loads with loading indicator
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
