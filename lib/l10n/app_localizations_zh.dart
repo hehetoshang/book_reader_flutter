@@ -198,4 +198,55 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorLoading => '加载 EPUB 错误';
+
+  @override
+  String get open => '打开';
+
+  @override
+  String get addToFavorites => '添加到收藏';
+
+  @override
+  String get removeFromFavorites => '从收藏移除';
+
+  @override
+  String get markAsRead => '标记为已读';
+
+  @override
+  String get markAsUnread => '标记为未读';
+
+  @override
+  String get bookInfo => '书籍信息';
+
+  @override
+  String get deleteBook => '删除书籍';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String get unknown => '未知';
+
+  @override
+  String get bookInfoTitle => '标题';
+
+  @override
+  String get bookInfoAuthor => '作者';
+
+  @override
+  String get bookInfoType => '类型';
+
+  @override
+  String get bookInfoAdded => '添加时间';
+
+  @override
+  String get bookInfoLastRead => '上次阅读';
+
+  @override
+  String get bookInfoPages => '页数';
+
+  @override
+  String get bookInfoProgress => '进度';
+
+  @override
+  String get bookInfoFile => '文件';
 }

@@ -200,4 +200,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoading => 'Error loading EPUB';
+
+  @override
+  String get open => 'Open';
+
+  @override
+  String get addToFavorites => 'Add to Favorites';
+
+  @override
+  String get removeFromFavorites => 'Remove from Favorites';
+
+  @override
+  String get markAsRead => 'Mark as Read';
+
+  @override
+  String get markAsUnread => 'Mark as Unread';
+
+  @override
+  String get bookInfo => 'Book Info';
+
+  @override
+  String get deleteBook => 'Delete Book';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get bookInfoTitle => 'Title';
+
+  @override
+  String get bookInfoAuthor => 'Author';
+
+  @override
+  String get bookInfoType => 'Type';
+
+  @override
+  String get bookInfoAdded => 'Added';
+
+  @override
+  String get bookInfoLastRead => 'Last Read';
+
+  @override
+  String get bookInfoPages => 'Pages';
+
+  @override
+  String get bookInfoProgress => 'Progress';
+
+  @override
+  String get bookInfoFile => 'File';
 }

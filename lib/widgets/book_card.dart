@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/models.dart';
 import 'reading_progress_bar.dart';
 
@@ -21,6 +22,7 @@ class BookCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
+        onSecondaryTap: onLongPress, // 右键点击支持
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -135,6 +137,7 @@ class BookListItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
+        onSecondaryTap: onLongPress, // 右键点击支持
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(

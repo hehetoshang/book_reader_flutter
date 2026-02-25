@@ -463,6 +463,27 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading EPUB'**
   String get errorLoading;
+
+  /// Book Options Menu
+  String get open;
+  String get addToFavorites;
+  String get removeFromFavorites;
+  String get markAsRead;
+  String get markAsUnread;
+  String get bookInfo;
+  String get deleteBook;
+  String get close;
+  String get unknown;
+
+  /// Book Info Dialog
+  String get bookInfoTitle;
+  String get bookInfoAuthor;
+  String get bookInfoType;
+  String get bookInfoAdded;
+  String get bookInfoLastRead;
+  String get bookInfoPages;
+  String get bookInfoProgress;
+  String get bookInfoFile;
 }
 
 class _AppLocalizationsDelegate

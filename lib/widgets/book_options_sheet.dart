@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 
@@ -20,6 +21,7 @@ class BookOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
@@ -39,7 +41,7 @@ class BookOptionsSheet extends StatelessWidget {
           // Open
           ListTile(
             leading: const Icon(Icons.open_in_new),
-            title: const Text(AppStrings.open),
+            title: Text(l10n.open),
             onTap: onOpen,
           ),
           // Toggle favorite
@@ -50,8 +52,8 @@ class BookOptionsSheet extends StatelessWidget {
             ),
             title: Text(
               book.isFavorite
-                  ? AppStrings.removeFromFavorites
-                  : AppStrings.addToFavorites,
+                  ? l10n.removeFromFavorites
+                  : l10n.addToFavorites,
             ),
             onTap: onToggleFavorite,
           ),
@@ -62,15 +64,15 @@ class BookOptionsSheet extends StatelessWidget {
             ),
             title: Text(
               book.isRead
-                  ? AppStrings.markAsUnread
-                  : AppStrings.markAsRead,
+                  ? l10n.markAsUnread
+                  : l10n.markAsRead,
             ),
             onTap: onMarkAsRead,
           ),
           // Book info
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text(AppStrings.bookInfo),
+            title: Text(l10n.bookInfo),
             onTap: () {
               Navigator.pop(context);
               _showBookInfo(context);
@@ -80,9 +82,9 @@ class BookOptionsSheet extends StatelessWidget {
           // Delete
           ListTile(
             leading: const Icon(Icons.delete_outline, color: Colors.red),
-            title: const Text(
-              AppStrings.deleteBook,
-              style: TextStyle(color: Colors.red),
+            title: Text(
+              l10n.deleteBook,
+              style: const TextStyle(color: Colors.red),
             ),
             onTap: onDelete,
           ),
@@ -128,30 +130,31 @@ class BookOptionsSheet extends StatelessWidget {
   }
 
   void _showBookInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(AppStrings.bookInfo),
+        title: Text(l10n.bookInfo),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow('Title', book.title),
-            _buildInfoRow('Author', book.author.isNotEmpty ? book.author : 'Unknown'),
-            _buildInfoRow('Type', book.fileType.displayName),
-            _buildInfoRow('Added', book.addedAt.formattedDate),
+            _buildInfoRow(l10n.bookInfoTitle, book.title),
+            _buildInfoRow(l10n.bookInfoAuthor, book.author.isNotEmpty ? book.author : l10n.unknown),
+            _buildInfoRow(l10n.bookInfoType, book.fileType.displayName),
+            _buildInfoRow(l10n.bookInfoAdded, book.addedAt.formattedDate),
             if (book.lastReadAt != null)
-              _buildInfoRow('Last Read', book.lastReadAt!.relativeTime),
+              _buildInfoRow(l10n.bookInfoLastRead, book.lastReadAt!.relativeTime),
             if (book.totalPages != null)
-              _buildInfoRow('Pages', book.totalPages.toString()),
-            _buildInfoRow('Progress', '${(book.readingProgress * 100).toStringAsFixed(1)}%'),
-            _buildInfoRow('File', book.filePath.fileName),
+              _buildInfoRow(l10n.bookInfoPages, book.totalPages.toString()),
+            _buildInfoRow(l10n.bookInfoProgress, '${(book.readingProgress * 100).toStringAsFixed(1)}%'),
+            _buildInfoRow(l10n.bookInfoFile, book.filePath.fileName),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(AppStrings.close),
+            child: Text(l10n.close),
           ),
         ],
       ),
