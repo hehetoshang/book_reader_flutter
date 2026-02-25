@@ -452,60 +452,6 @@ abstract class AppLocalizations {
   /// **'Reading Mode'**
   String get readingMode;
 
-  /// No description provided for @readingModeScroll.
-  ///
-  /// In en, this message translates to:
-  /// **'Scroll Mode'**
-  String get readingModeScroll;
-
-  /// No description provided for @readingModePage.
-  ///
-  /// In en, this message translates to:
-  /// **'Page Mode'**
-  String get readingModePage;
-
-  /// No description provided for @sepia.
-  ///
-  /// In en, this message translates to:
-  /// **'Sepia'**
-  String get sepia;
-
-  /// No description provided for @textAlignment.
-  ///
-  /// In en, this message translates to:
-  /// **'Text Alignment'**
-  String get textAlignment;
-
-  /// No description provided for @alignLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'Left'**
-  String get alignLeft;
-
-  /// No description provided for @alignCenter.
-  ///
-  /// In en, this message translates to:
-  /// **'Center'**
-  String get alignCenter;
-
-  /// No description provided for @alignRight.
-  ///
-  /// In en, this message translates to:
-  /// **'Right'**
-  String get alignRight;
-
-  /// No description provided for @alignJustify.
-  ///
-  /// In en, this message translates to:
-  /// **'Justify'**
-  String get alignJustify;
-
-  /// No description provided for @lineHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Line Height'**
-  String get lineHeight;
-
   /// No description provided for @loading.
   ///
   /// In en, this message translates to:

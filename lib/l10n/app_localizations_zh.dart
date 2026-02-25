@@ -194,33 +194,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get readingMode => '阅读模式';
 
   @override
-  String get readingModeScroll => '滚动模式';
-
-  @override
-  String get readingModePage => '翻页模式';
-
-  @override
-  String get sepia => '羊皮纸';
-
-  @override
-  String get textAlignment => '文本对齐';
-
-  @override
-  String get alignLeft => '左对齐';
-
-  @override
-  String get alignCenter => '居中';
-
-  @override
-  String get alignRight => '右对齐';
-
-  @override
-  String get alignJustify => '两端对齐';
-
-  @override
-  String get lineHeight => '行高';
-
-  @override
   String get loading => '加载 EPUB...';
 
   @override
