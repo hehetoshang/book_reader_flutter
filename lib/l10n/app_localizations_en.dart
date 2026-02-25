@@ -196,6 +196,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readingMode => 'Reading Mode';
 
   @override
+  String get readingModeScroll => 'Scroll Mode';
+
+  @override
+  String get readingModePage => 'Page Mode';
+
+  @override
+  String get sepia => 'Sepia';
+
+  @override
+  String get textAlignment => 'Text Alignment';
+
+  @override
+  String get alignLeft => 'Left';
+
+  @override
+  String get alignCenter => 'Center';
+
+  @override
+  String get alignRight => 'Right';
+
+  @override
+  String get alignJustify => 'Justify';
+
+  @override
+  String get lineHeight => 'Line Height';
+
+  @override
   String get loading => 'Loading EPUB...';
 
   @override

@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:katbook_epub_reader/katbook_epub_reader.dart';
+import '../l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../routes/app_router.dart';
 import '../utils/utils.dart';
+import '../widgets/widgets.dart';
 
 class EpubReaderScreen extends StatefulWidget {
   final String bookId;
@@ -155,6 +157,7 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
       return Scaffold(
@@ -168,13 +171,13 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
             },
           ),
         ),
-        body: const Center(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Loading EPUB...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(l10n.loading),
             ],
           ),
         ),
@@ -201,16 +204,16 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
               children: [
                 const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
-                const Text(
-                  'Error loading EPUB',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.errorLoading,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(_error!, textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _loadBook,
-                  child: const Text('Try Again'),
+                  child: Text(l10n.cancel),
                 ),
               ],
             ),
@@ -244,7 +247,32 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
 
           // Layout settings
           contentWidthPercent: 0.70,
-          showAppBar: true,
+          showAppBar: false,
+          appBarBuilder: (context, readerState) {
+            return EpubReaderAppBar(
+              controller: _controller,
+              themeData: readerState.themeData,
+              currentTheme: readerState.currentTheme,
+              readingMode: readerState.readingMode,
+              progress: _progress,
+              onShowTableOfContents: () {
+                readerState.showTableOfContents();
+              },
+              onToggleFontSlider: () {
+                readerState.toggleFontSlider();
+              },
+              onSetTheme: (theme) {
+                readerState.setTheme(theme);
+              },
+              onSetReadingMode: (mode) {
+                readerState.setReadingMode(mode);
+              },
+              onBackPressed: () {
+                context.read<ReadingProvider>().endReading();
+                AppRouter.goBack(context);
+              },
+            );
+          },
 
           // Callbacks for tracking
           onPositionChanged: (position) {
@@ -328,6 +356,7 @@ class BookmarksSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -335,12 +364,12 @@ class BookmarksSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Bookmarks',
+            l10n.bookmarks,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
-          const Center(
-            child: Text('No bookmarks yet'),
+          Center(
+            child: Text(l10n.noBooks),
           ),
         ],
       ),
@@ -354,6 +383,7 @@ class EpubSettingsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -362,14 +392,14 @@ class EpubSettingsSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Reading Settings',
+            l10n.readerSettings,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
           // Font size
           ListTile(
             leading: const Icon(Icons.text_fields),
-            title: const Text('Font Size'),
+            title: Text(l10n.fontSize),
             subtitle: Slider(
               value: settings.epubFontSize,
               min: 8,
@@ -383,7 +413,7 @@ class EpubSettingsSheet extends StatelessWidget {
           // Line height
           ListTile(
             leading: const Icon(Icons.format_line_spacing),
-            title: const Text('Line Height'),
+            title: Text(l10n.lineHeight),
             subtitle: Slider(
               value: settings.epubLineHeight,
               min: 1.0,
@@ -397,23 +427,23 @@ class EpubSettingsSheet extends StatelessWidget {
           // Theme
           ListTile(
             leading: const Icon(Icons.color_lens),
-            title: const Text('Theme'),
+            title: Text(l10n.theme),
             trailing: SegmentedButton<EpubTheme>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: EpubTheme.light,
-                  label: Text('Light'),
-                  icon: Icon(Icons.wb_sunny),
+                  label: Text(l10n.light),
+                  icon: const Icon(Icons.wb_sunny),
                 ),
                 ButtonSegment(
                   value: EpubTheme.dark,
-                  label: Text('Dark'),
-                  icon: Icon(Icons.nights_stay),
+                  label: Text(l10n.dark),
+                  icon: const Icon(Icons.nights_stay),
                 ),
                 ButtonSegment(
                   value: EpubTheme.sepia,
-                  label: Text('Sepia'),
-                  icon: Icon(Icons.coffee),
+                  label: Text(l10n.sepia),
+                  icon: const Icon(Icons.coffee),
                 ),
               ],
               selected: {settings.epubTheme},
@@ -425,25 +455,25 @@ class EpubSettingsSheet extends StatelessWidget {
           // Text alignment
           ListTile(
             leading: const Icon(Icons.format_align_left),
-            title: const Text('Text Alignment'),
+            title: Text(l10n.textAlignment),
             trailing: DropdownButton<EpubTextAlign>(
               value: settings.epubTextAlign,
-              items: const [
+              items: [
                 DropdownMenuItem(
                   value: EpubTextAlign.left,
-                  child: Text('Left'),
+                  child: Text(l10n.alignLeft),
                 ),
                 DropdownMenuItem(
                   value: EpubTextAlign.center,
-                  child: Text('Center'),
+                  child: Text(l10n.alignCenter),
                 ),
                 DropdownMenuItem(
                   value: EpubTextAlign.right,
-                  child: Text('Right'),
+                  child: Text(l10n.alignRight),
                 ),
                 DropdownMenuItem(
                   value: EpubTextAlign.justify,
-                  child: Text('Justify'),
+                  child: Text(l10n.alignJustify),
                 ),
               ],
               onChanged: (value) {
