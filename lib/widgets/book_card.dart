@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
 import '../models/models.dart';
 import 'reading_progress_bar.dart';
 
@@ -17,6 +18,7 @@ class BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -28,17 +30,16 @@ class BookCard extends StatelessWidget {
           children: [
             // Cover Image
             Expanded(
-              flex: 3,
-              child: _buildCover(),
+              flex: 5,
+              child: _buildCover(context),
             ),
             // Book Info
             Expanded(
-              flex: 1,
+              flex: 2,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Title
                     Text(
@@ -49,19 +50,20 @@ class BookCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    // Author
-                    if (book.author.isNotEmpty)
-                      Text(
-                        book.author,
+                    // Author - always show, display 'Unknown' if empty
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        book.author.isNotEmpty ? book.author : l10n.unknown,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.grey,
                         ),
                       ),
+                    ),
                     const Spacer(),
-                    // Progress Bar
+                    // Progress Bar - show if has progress
                     if (book.readingProgress > 0)
                       ReadingProgressBar(
                         progress: book.readingProgress,
@@ -77,21 +79,22 @@ class BookCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCover() {
+  Widget _buildCover(BuildContext context) {
     if (book.coverPath != null) {
       return Image.network(
         book.coverPath!,
         fit: BoxFit.cover,
         width: double.infinity,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
       );
     }
-    return _buildPlaceholder();
+    return _buildPlaceholder(context);
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: Colors.grey[200],
+      color: isDark ? Colors.grey[800] : Colors.grey[200],
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -101,13 +104,13 @@ class BookCard extends StatelessWidget {
                   ? Icons.picture_as_pdf
                   : Icons.menu_book,
               size: 48,
-              color: Colors.grey[400],
+              color: isDark ? Colors.grey[600] : Colors.grey[400],
             ),
             const SizedBox(height: 8),
             Text(
               book.fileType.displayName,
               style: TextStyle(
-                color: Colors.grey[500],
+                color: isDark ? Colors.grey[500] : Colors.grey[500],
                 fontSize: 12,
               ),
             ),

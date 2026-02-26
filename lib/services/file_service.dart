@@ -61,18 +61,25 @@ class FileService {
       final fileType = BookFileTypeExtension.fromPath(file.name);
       if (fileType == null) return null;
 
-      // Get file path
+      // Always copy file to app directory to avoid deleting source file
       String filePath;
-      if (file.path != null) {
-        filePath = file.path!;
-      } else if (file.bytes != null) {
-        // For web or when path is not available, save to app directory
+      if (file.bytes != null) {
+        // Use bytes directly
         filePath = await _saveBytesToAppDirectory(file.bytes!, file.name);
+      } else if (file.path != null) {
+        // Copy file from source to app directory
+        final sourceFile = File(file.path!);
+        if (await sourceFile.exists()) {
+          final bytes = await sourceFile.readAsBytes();
+          filePath = await _saveBytesToAppDirectory(bytes, file.name);
+        } else {
+          return null;
+        }
       } else {
         return null;
       }
 
-      // Extract metadata
+      // Extract metadata from the copied file
       final metadata = await _extractMetadata(filePath, fileType);
 
       // Generate cover if possible

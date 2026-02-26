@@ -223,12 +223,10 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
       );
     }
 
-    // Convert app theme to reader theme
-    final readerTheme = switch (settings.epubTheme) {
-      EpubTheme.light => ReaderTheme.light,
-      EpubTheme.dark => ReaderTheme.dark,
-      EpubTheme.sepia => ReaderTheme.sepia,
-    };
+    // Convert app theme brightness to reader theme
+    // Use dark theme if app is in dark mode, otherwise use light theme
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final readerTheme = isDarkMode ? ReaderTheme.dark : ReaderTheme.light;
 
     // Convert app locale to reader locale
     final readerLocale = Locale(settings.languageCode);
