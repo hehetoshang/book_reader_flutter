@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
@@ -81,8 +82,8 @@ class BookCard extends StatelessWidget {
 
   Widget _buildCover(BuildContext context) {
     if (book.coverPath != null) {
-      return Image.network(
-        book.coverPath!,
+      return Image.file(
+        File(book.coverPath!),
         fit: BoxFit.cover,
         width: double.infinity,
         errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),

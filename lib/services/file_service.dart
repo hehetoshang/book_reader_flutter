@@ -271,6 +271,113 @@ class FileService {
     return metadata;
   }
 
+  /// Extract cover image from EPUB
+  Future<String?> _extractEpubCover(String epubPath, String outputPath) async {
+    try {
+      final file = File(epubPath);
+      if (!await file.exists()) return null;
+
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      // Find container.xml to get the path to content.opf
+      final containerFile = archive.findFile('META-INF/container.xml');
+      if (containerFile == null) return null;
+
+      final containerContent = utf8.decode(containerFile.content as List<int>);
+      final containerDoc = XmlDocument.parse(containerContent);
+
+      final rootfileElement = containerDoc.findAllElements('rootfile').firstOrNull;
+      if (rootfileElement == null) return null;
+
+      final contentOpfPath = rootfileElement.getAttribute('full-path');
+      if (contentOpfPath == null) return null;
+
+      // Get the base directory of content.opf
+      final baseDir = contentOpfPath.contains('/') 
+          ? contentOpfPath.substring(0, contentOpfPath.lastIndexOf('/') + 1) 
+          : '';
+
+      // Find and parse content.opf
+      final contentOpfFile = archive.findFile(contentOpfPath);
+      if (contentOpfFile == null) return null;
+
+      final contentOpfContent = utf8.decode(contentOpfFile.content as List<int>);
+      final contentOpfDoc = XmlDocument.parse(contentOpfContent);
+
+      // Find cover image reference
+      String? coverHref;
+
+      // Method 1: Look for meta element with name="cover"
+      final metadataElement = contentOpfDoc.findAllElements('metadata').firstOrNull;
+      if (metadataElement != null) {
+        final coverMeta = metadataElement.findElements('meta').where(
+          (e) => e.getAttribute('name') == 'cover',
+        ).firstOrNull;
+        if (coverMeta != null) {
+          final coverId = coverMeta.getAttribute('content');
+          if (coverId != null) {
+            // Find item with matching id
+            final manifestElement = contentOpfDoc.findAllElements('manifest').firstOrNull;
+            if (manifestElement != null) {
+              final coverItem = manifestElement.findElements('item').where(
+                (e) => e.getAttribute('id') == coverId,
+              ).firstOrNull;
+              if (coverItem != null) {
+                coverHref = coverItem.getAttribute('href');
+              }
+            }
+          }
+        }
+      }
+
+      // Method 2: Look for item with id="cover" or properties="cover-image"
+      if (coverHref == null) {
+        final manifestElement = contentOpfDoc.findAllElements('manifest').firstOrNull;
+        if (manifestElement != null) {
+          // Try properties="cover-image"
+          final coverItem = manifestElement.findElements('item').where(
+            (e) => e.getAttribute('properties') == 'cover-image',
+          ).firstOrNull;
+          if (coverItem != null) {
+            coverHref = coverItem.getAttribute('href');
+          }
+
+          // Try id="cover"
+          if (coverHref == null) {
+            final coverById = manifestElement.findElements('item').where(
+              (e) => e.getAttribute('id')?.toLowerCase() == 'cover',
+            ).firstOrNull;
+            if (coverById != null) {
+              coverHref = coverById.getAttribute('href');
+            }
+          }
+        }
+      }
+
+      if (coverHref == null) return null;
+
+      // Construct full path to cover image
+      final coverPath = baseDir + coverHref;
+
+      // Find cover image in archive
+      final coverFile = archive.findFile(coverPath);
+      if (coverFile == null) return null;
+
+      // Save cover image to output path
+      final coverBytes = coverFile.content as List<int>;
+      final outputFile = File(outputPath);
+      await outputFile.writeAsBytes(coverBytes);
+
+      print('📚 EPUB cover extracted: $outputPath');
+      return outputPath;
+    } catch (e, stack) {
+      print('Error extracting EPUB cover: $e');
+      print('Stack trace: $stack');
+      return null;
+    }
+  }
+
   /// Generate cover image for book
   Future<String?> _generateCover(String filePath, BookFileType fileType) async {
     try {
@@ -287,8 +394,8 @@ class FileService {
         // Return a placeholder for now
         return null;
       } else if (fileType == BookFileType.epub) {
-        // EPUB cover extraction will be handled by epub package
-        return null;
+        // Extract cover from EPUB
+        return await _extractEpubCover(filePath, coverPath);
       }
 
       return null;

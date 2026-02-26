@@ -254,6 +254,7 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
           // Language settings - 使用程序总设置的语言
           locale: readerLocale,
           showLanguageButton: widget.showLanguageButton,
+          showThemeButton: false, // 主题跟随主程序，不显示主题切换按钮
 
           // Callbacks for tracking
           onPositionChanged: (position) {
