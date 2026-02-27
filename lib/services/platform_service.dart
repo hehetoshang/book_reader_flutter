@@ -90,8 +90,8 @@ class PlatformService {
 
   /// Get appropriate card aspect ratio
   double get bookCardAspectRatio {
-    if (isMobile) return 0.6; // Taller cards on mobile
-    return 0.65; // Slightly wider on desktop
+    if (isMobile) return 2.0; // Wider cards on mobile for horizontal layout
+    return 2.5; // Wider on desktop for horizontal layout
   }
 
   /// Check if should use cupertino style

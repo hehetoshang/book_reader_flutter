@@ -484,6 +484,9 @@ abstract class AppLocalizations {
   String get bookInfoPages;
   String get bookInfoProgress;
   String get bookInfoFile;
+
+  /// Book Card
+  String get noDescription;
 }
 
 class _AppLocalizationsDelegate

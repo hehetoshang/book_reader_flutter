@@ -117,7 +117,7 @@ class EpubReaderSettingsAdapter extends TypeAdapter<EpubReaderSettings> {
       fontFamily: fields[5] as String?,
       sidePadding: fields[6] as double,
       topBottomPadding: fields[7] as double,
-      readingMode: fields[8] as ReadingMode? ?? ReadingMode.page,
+      readingMode: fields[8] as ReadingMode,
     );
   }
 

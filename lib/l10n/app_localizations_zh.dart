@@ -249,4 +249,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bookInfoFile => '文件';
+
+  @override
+  String get noDescription => '暂无简介';
 }

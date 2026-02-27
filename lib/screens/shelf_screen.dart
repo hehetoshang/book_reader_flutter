@@ -143,15 +143,32 @@ class _ShelfScreenState extends State<ShelfScreen> {
   }
 
   Widget _buildGridView(List<Book> books) {
-    final crossAxisCount = _platformService.getGridColumnCount(
-      MediaQuery.of(context).size.width,
-    );
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // 设置卡片的最小宽度（以像素为单位）
+    // 你可以调整这个值来改变卡片大小
+    const double minCardWidth = 370; // 减小宽度以满足需求
+    
+    // 根据最小卡片宽度计算列数
+    int crossAxisCount = (screenWidth / minCardWidth).floor();
+    // 确保至少有一列
+    crossAxisCount = crossAxisCount.clamp(1, 6);
+    
+    // 计算实际的卡片宽度（减去间距后）
+    double totalSpacing = (crossAxisCount + 1) * 20.0; // 左右外边距 + 列间距
+    double actualCardWidth = (screenWidth - totalSpacing) / crossAxisCount;
+    
+    // 根据实际卡片宽度和期望的卡片高度计算宽高比
+    // 期望的卡片高度（包括封面和信息区域）
+    double expectedCardHeight = 125; // 减小高度以保持比例协调
+    
+    double aspectRatio = actualCardWidth / expectedCardHeight;
 
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        childAspectRatio: _platformService.bookCardAspectRatio,
+        childAspectRatio: aspectRatio,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),

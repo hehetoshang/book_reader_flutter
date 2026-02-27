@@ -251,4 +251,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bookInfoFile => 'File';
+
+  @override
+  String get noDescription => 'No description available';
 }
