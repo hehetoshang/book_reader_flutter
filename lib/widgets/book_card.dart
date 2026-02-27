@@ -85,7 +85,7 @@ class BookCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: Colors.grey[700],
                               ),
                             ),
@@ -98,13 +98,13 @@ class BookCard extends StatelessWidget {
                               maxLines: descriptionMaxLines,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 color: Colors.grey[700],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 1.7),
                         Row(
                           children: [
                             Icon(

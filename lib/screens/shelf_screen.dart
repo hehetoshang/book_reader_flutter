@@ -147,7 +147,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
     
     // 设置卡片的最小宽度（以像素为单位）
     // 你可以调整这个值来改变卡片大小
-    const double minCardWidth = 370; // 减小宽度以满足需求
+    const double minCardWidth = 350; // 减小宽度以满足需求
     
     // 根据最小卡片宽度计算列数
     int crossAxisCount = (screenWidth / minCardWidth).floor();
