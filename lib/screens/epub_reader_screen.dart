@@ -248,7 +248,7 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
           initialReadingMode: settings.epubReadingMode,
 
           // Layout settings
-          contentWidthPercent: 0.70,
+          contentWidthPercent: 0.90,
           showAppBar: true,
 
           // Language settings - 使用程序总设置的语言
