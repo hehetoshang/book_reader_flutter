@@ -185,7 +185,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.version.outputs.tag }}
-          name: Release ${{ needs.version.outputs.version }}
           draft: false
           prerelease: false
           files: |
@@ -233,7 +232,7 @@ jobs:
           RELEASE_DATA=$(cat <<EOF
           {
             "tag_name": "latest",
-            "name": "Latest Release (v${VERSION})",
+            "name": "latest",
             "body": "This is the latest release based on ${TAG}.\n\n**Note:** This release is automatically updated and always points to the most recent tagged release.",
             "draft": false,
             "prerelease": false
