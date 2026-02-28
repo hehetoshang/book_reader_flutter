@@ -53,6 +53,7 @@ dependencies:
   package_info_plus: ^8.0.0
   archive: ^3.4.10
   xml: ^6.5.0
+  html: ^0.15.4
   
   # 桌面端支持
   window_manager: ^0.3.9

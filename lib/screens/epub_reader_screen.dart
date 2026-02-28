@@ -229,7 +229,11 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     final readerTheme = isDarkMode ? ReaderTheme.dark : ReaderTheme.light;
 
     // Convert app locale to reader locale
-    final readerLocale = Locale(settings.languageCode);
+    // Use system locale if language code is empty
+    final languageCode = settings.languageCode.isEmpty
+        ? WidgetsBinding.instance.platformDispatcher.locale.languageCode
+        : settings.languageCode;
+    final readerLocale = Locale(languageCode);
 
     return Scaffold(
       body: WillPopScope(

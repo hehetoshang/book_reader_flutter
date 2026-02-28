@@ -65,7 +65,7 @@ class AppSettings extends HiveObject {
 
   AppSettings({
     this.themeMode = AppThemeMode.system,
-    this.languageCode = 'zh',
+    this.languageCode = '', // Empty string means use system language
     required this.pdfSettings,
     required this.epubSettings,
     this.windowSettings,

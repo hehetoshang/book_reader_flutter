@@ -110,19 +110,15 @@ class AppRouter {
   }
 
   static void goToSettings(BuildContext context) {
-    context.go('/settings');
+    context.push('/settings');
   }
 
   static void goToAbout(BuildContext context) {
-    context.go('/about');
+    context.push('/about');
   }
 
   static void goBack(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      goToShelf(context);
-    }
+    context.pop();
   }
 }
 

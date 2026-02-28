@@ -42,10 +42,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageChinese => 'Chinese';
+  String get languageSystem => 'System';
 
   @override
   String get readerSettings => 'Reader Settings';
@@ -104,8 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developer => 'Developer';
 
   @override
-  String get description =>
-      'A cross-platform reader that supports PDF and EPUB formats';
+  String get description => 'A cross-platform reader that supports PDF and EPUB formats';
 
   @override
   String get back => 'Back';
@@ -181,8 +177,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get clearAllDataConfirm =>
-      'This will delete all books and reading progress. This action cannot be undone.';
+  String get clearAllDataConfirm => 'This will delete all books and reading progress. This action cannot be undone.';
 
   @override
   String get allDataCleared => 'All data cleared';
@@ -193,40 +188,31 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get readingMode => 'Reading Mode';
+  String get noDescription => 'No description';
 
   @override
-  String get loading => 'Loading EPUB...';
-
-  @override
-  String get errorLoading => 'Error loading EPUB';
+  String get unknown => 'Unknown';
 
   @override
   String get open => 'Open';
 
   @override
-  String get addToFavorites => 'Add to Favorites';
+  String get removeFromFavorites => 'Remove from favorites';
 
   @override
-  String get removeFromFavorites => 'Remove from Favorites';
+  String get addToFavorites => 'Add to favorites';
 
   @override
-  String get markAsRead => 'Mark as Read';
+  String get markAsUnread => 'Mark as unread';
 
   @override
-  String get markAsUnread => 'Mark as Unread';
+  String get markAsRead => 'Mark as read';
 
   @override
   String get bookInfo => 'Book Info';
 
   @override
   String get deleteBook => 'Delete Book';
-
-  @override
-  String get close => 'Close';
-
-  @override
-  String get unknown => 'Unknown';
 
   @override
   String get bookInfoTitle => 'Title';
@@ -253,5 +239,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookInfoFile => 'File';
 
   @override
-  String get noDescription => 'No description available';
+  String get close => 'Close';
 }

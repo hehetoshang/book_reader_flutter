@@ -1,10 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../routes/app_router.dart';
 import '../utils/utils.dart';
 import '../l10n/app_localizations.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
+
+  @override
+  State<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends State<AboutScreen> {
+  String _version = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _version = packageInfo.version;
+      });
+    } catch (e) {
+      setState(() {
+        _version = '0.0.1';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +73,7 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 8),
             // Version
             Text(
-              'Version ${AppConstants.appVersion}',
+              'Version $_version',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.grey,
                   ),
@@ -72,7 +99,7 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 48),
             // Copyright
             Text(
-              '© 2024 ${AppConstants.appName}',
+              '© 2026 houheya',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey,
                   ),

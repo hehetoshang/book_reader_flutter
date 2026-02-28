@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
@@ -6,8 +7,34 @@ import '../routes/app_router.dart';
 import '../utils/utils.dart';
 import '../l10n/app_localizations.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  String _version = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _version = packageInfo.version;
+      });
+    } catch (e) {
+      setState(() {
+        _version = '0.0.1';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +86,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.info),
             title: Text(l10n.version),
-            subtitle: const Text(AppConstants.appVersion),
+            subtitle: Text(_version),
           ),
           ListTile(
             leading: const Icon(Icons.description),
@@ -68,7 +95,7 @@ class SettingsScreen extends StatelessWidget {
               showLicensePage(
                 context: context,
                 applicationName: AppConstants.appName,
-                applicationVersion: AppConstants.appVersion,
+                applicationVersion: _version,
               );
             },
           ),
@@ -135,28 +162,38 @@ class SettingsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
+        // Determine display text for subtitle
+        String getLanguageDisplayText(String code) {
+          if (code.isEmpty) return l10n.languageSystem; // System language
+          return code == 'zh' ? '中文' : 'English';
+        }
+        
         return ListTile(
           leading: const Icon(Icons.language),
           title: Text(l10n.language),
-          subtitle: Text(settings.languageCode == 'zh' 
-              ? l10n.languageChinese 
-              : l10n.languageEnglish),
+          subtitle: Text(getLanguageDisplayText(settings.languageCode)),
           trailing: DropdownButton<String>(
-            value: settings.languageCode,
+            value: settings.languageCode.isEmpty ? 'system' : settings.languageCode,
             underline: const SizedBox(),
             items: [
               DropdownMenuItem(
+                value: 'system',
+                child: Text(l10n.languageSystem),
+              ),
+              DropdownMenuItem(
                 value: 'zh',
-                child: Text(l10n.languageChinese),
+                child: const Text('中文'),
               ),
               DropdownMenuItem(
                 value: 'en',
-                child: Text(l10n.languageEnglish),
+                child: const Text('English'),
               ),
             ],
             onChanged: (value) {
               if (value != null) {
-                settings.setLanguage(value);
+                // Empty string means use system language
+                final languageCode = value == 'system' ? '' : value;
+                settings.setLanguage(languageCode);
               }
             },
           ),

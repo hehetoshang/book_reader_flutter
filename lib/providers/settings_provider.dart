@@ -37,7 +37,12 @@ class SettingsProvider extends ChangeNotifier {
 
   // Language getter
   String get languageCode => settings.languageCode;
-  Locale get locale => Locale(languageCode);
+  
+  Locale? get locale {
+    // Empty language code means use system language
+    if (languageCode.isEmpty) return null;
+    return Locale(languageCode);
+  }
 
   // PDF settings getters
   PdfReaderSettings get pdfSettings => settings.pdfSettings;

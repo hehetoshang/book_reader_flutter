@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class AppConstants {
   // App Info
   static const String appName = 'Universal Reader';
-  static const String appVersion = '1.0.0';
-  static const String appDescription = '一款支持PDF和EPUB的跨平台阅读器';
+  static const String appDescription = '一款支持 PDF 和 EPUB 的跨平台阅读器';
 
   // Organization
   static const String organizationDomain = 'com.houheya.reader';

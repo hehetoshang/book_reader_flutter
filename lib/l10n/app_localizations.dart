@@ -62,8 +62,7 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,8 +82,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -164,17 +161,11 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get language;
 
-  /// No description provided for @languageEnglish.
+  /// No description provided for @languageSystem.
   ///
   /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
-
-  /// No description provided for @languageChinese.
-  ///
-  /// In en, this message translates to:
-  /// **'Chinese'**
-  String get languageChinese;
+  /// **'System'**
+  String get languageSystem;
 
   /// No description provided for @readerSettings.
   ///
@@ -446,51 +437,116 @@ abstract class AppLocalizations {
   /// **'Failed to clear data: {error}'**
   String failedToClearData(Object error);
 
-  /// No description provided for @readingMode.
+  /// No description provided for @noDescription.
   ///
   /// In en, this message translates to:
-  /// **'Reading Mode'**
-  String get readingMode;
+  /// **'No description'**
+  String get noDescription;
 
-  /// No description provided for @loading.
+  /// No description provided for @unknown.
   ///
   /// In en, this message translates to:
-  /// **'Loading EPUB...'**
-  String get loading;
-
-  /// No description provided for @errorLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Error loading EPUB'**
-  String get errorLoading;
-
-  /// Book Options Menu
-  String get open;
-  String get addToFavorites;
-  String get removeFromFavorites;
-  String get markAsRead;
-  String get markAsUnread;
-  String get bookInfo;
-  String get deleteBook;
-  String get close;
+  /// **'Unknown'**
   String get unknown;
 
-  /// Book Info Dialog
+  /// No description provided for @open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get open;
+
+  /// No description provided for @removeFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get removeFromFavorites;
+
+  /// No description provided for @addToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get addToFavorites;
+
+  /// No description provided for @markAsUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as unread'**
+  String get markAsUnread;
+
+  /// No description provided for @markAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get markAsRead;
+
+  /// No description provided for @bookInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Info'**
+  String get bookInfo;
+
+  /// No description provided for @deleteBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Book'**
+  String get deleteBook;
+
+  /// No description provided for @bookInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
   String get bookInfoTitle;
+
+  /// No description provided for @bookInfoAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
   String get bookInfoAuthor;
+
+  /// No description provided for @bookInfoType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
   String get bookInfoType;
+
+  /// No description provided for @bookInfoAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
   String get bookInfoAdded;
+
+  /// No description provided for @bookInfoLastRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Read'**
   String get bookInfoLastRead;
+
+  /// No description provided for @bookInfoPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
   String get bookInfoPages;
+
+  /// No description provided for @bookInfoProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
   String get bookInfoProgress;
+
+  /// No description provided for @bookInfoFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
   String get bookInfoFile;
 
-  /// Book Card
-  String get noDescription;
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -499,25 +555,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'zh':
-      return AppLocalizationsZh();
+    case 'en': return AppLocalizationsEn();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

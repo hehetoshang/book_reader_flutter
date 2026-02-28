@@ -136,7 +136,7 @@ class _UniversalReaderAppState extends State<UniversalReaderApp> {
             Locale('zh'),
             Locale('fr'),
           ],
-          locale: settings.locale,
+          locale: settings.locale ?? WidgetsBinding.instance.platformDispatcher.locale,
 
           // Router
           routerConfig: AppRouter.router,

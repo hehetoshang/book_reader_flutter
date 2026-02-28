@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:html/parser.dart' as html_parser;
 import '../l10n/app_localizations.dart';
 import '../models/models.dart';
 import 'reading_progress_bar.dart';
@@ -16,6 +17,13 @@ class BookCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
   });
+
+  /// 将 HTML 内容转换为纯文本
+  String _stripHtml(String? html) {
+    if (html == null || html.isEmpty) return '';
+    final document = html_parser.parse(html);
+    return document.body?.text.trim() ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +101,7 @@ class BookCard extends StatelessWidget {
                             // Description - show description or placeholder
                             Text(
                               (book.description != null && book.description!.isNotEmpty)
-                                  ? book.description!
+                                  ? _stripHtml(book.description!)
                                   : l10n.noDescription,
                               maxLines: descriptionMaxLines,
                               overflow: TextOverflow.ellipsis,
@@ -207,6 +215,13 @@ class BookListItem extends StatelessWidget {
     this.onLongPress,
   });
 
+  /// 将 HTML 内容转换为纯文本
+  String _stripHtml(String? html) {
+    if (html == null || html.isEmpty) return '';
+    final document = html_parser.parse(html);
+    return document.body?.text.trim() ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -246,7 +261,7 @@ class BookListItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       (book.description != null && book.description!.isNotEmpty)
-                          ? book.description!
+                          ? _stripHtml(book.description!)
                           : l10n.noDescription,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -324,12 +339,26 @@ class BookListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Center(
-        child: Icon(
-          book.fileType == BookFileType.pdf
-              ? Icons.picture_as_pdf
-              : Icons.menu_book,
-          size: 28,
-          color: isDark ? Colors.grey[600] : Colors.grey[400],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              book.fileType == BookFileType.pdf
+                  ? Icons.picture_as_pdf
+                  : Icons.menu_book,
+              size: 28,
+              color: isDark ? Colors.grey[600] : Colors.grey[400],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              book.fileType.displayName,
+              style: TextStyle(
+                color: isDark ? Colors.grey[500] : Colors.grey[500],
+                fontSize: 10,
+              ),
+            ),
+          ],
         ),
       ),
     );

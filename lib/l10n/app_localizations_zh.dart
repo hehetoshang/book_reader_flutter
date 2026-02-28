@@ -42,10 +42,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get language => '语言';
 
   @override
-  String get languageEnglish => '英语';
-
-  @override
-  String get languageChinese => '中文';
+  String get languageSystem => '系统';
 
   @override
   String get readerSettings => '阅读器设置';
@@ -187,32 +184,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String failedToClearData(Object error) {
-    return '清除数据失败: $error';
+    return '清除数据失败：$error';
   }
 
   @override
-  String get readingMode => '阅读模式';
+  String get noDescription => '无描述';
 
   @override
-  String get loading => '加载 EPUB...';
-
-  @override
-  String get errorLoading => '加载 EPUB 错误';
+  String get unknown => '未知';
 
   @override
   String get open => '打开';
 
   @override
-  String get addToFavorites => '添加到收藏';
+  String get removeFromFavorites => '从收藏夹移除';
 
   @override
-  String get removeFromFavorites => '从收藏移除';
-
-  @override
-  String get markAsRead => '标记为已读';
+  String get addToFavorites => '添加到收藏夹';
 
   @override
   String get markAsUnread => '标记为未读';
+
+  @override
+  String get markAsRead => '标记为已读';
 
   @override
   String get bookInfo => '书籍信息';
@@ -221,13 +215,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteBook => '删除书籍';
 
   @override
-  String get close => '关闭';
-
-  @override
-  String get unknown => '未知';
-
-  @override
-  String get bookInfoTitle => '标题';
+  String get bookInfoTitle => '书名';
 
   @override
   String get bookInfoAuthor => '作者';
@@ -239,7 +227,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bookInfoAdded => '添加时间';
 
   @override
-  String get bookInfoLastRead => '上次阅读';
+  String get bookInfoLastRead => '最后阅读';
 
   @override
   String get bookInfoPages => '页数';
@@ -251,5 +239,5 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bookInfoFile => '文件';
 
   @override
-  String get noDescription => '暂无简介';
+  String get close => '关闭';
 }
