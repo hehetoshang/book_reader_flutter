@@ -5,64 +5,64 @@ class AppConstants {
   static const String appName = 'Universal Reader';
   static const String appVersion = '1.0.0';
   static const String appDescription = '一款支持PDF和EPUB的跨平台阅读器';
-  
+
   // Organization
-  static const String organizationDomain = 'com.example.reader';
-  
+  static const String organizationDomain = 'com.houheya.reader';
+
   // Storage Keys
   static const String booksBoxName = 'books';
   static const String progressBoxName = 'reading_progress';
   static const String settingsBoxName = 'app_settings';
-  
+
   // Supported File Types
   static const List<String> supportedExtensions = ['pdf', 'epub'];
   static const List<String> pdfExtensions = ['pdf'];
   static const List<String> epubExtensions = ['epub'];
-  
+
   // UI Constants
   static const double defaultPadding = 16.0;
   static const double smallPadding = 8.0;
   static const double largePadding = 24.0;
-  
+
   static const double defaultBorderRadius = 8.0;
   static const double smallBorderRadius = 4.0;
   static const double largeBorderRadius = 16.0;
-  
+
   // Animation Durations
   static const Duration shortAnimationDuration = Duration(milliseconds: 150);
   static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
   static const Duration longAnimationDuration = Duration(milliseconds: 500);
-  
+
   // Reading Settings
   static const double minFontSize = 8.0;
   static const double maxFontSize = 32.0;
   static const double defaultFontSize = 16.0;
   static const double fontSizeStep = 2.0;
-  
+
   static const double minLineHeight = 1.0;
   static const double maxLineHeight = 3.0;
   static const double defaultLineHeight = 1.5;
   static const double lineHeightStep = 0.1;
-  
+
   static const double minLetterSpacing = -2.0;
   static const double maxLetterSpacing = 5.0;
   static const double defaultLetterSpacing = 0.0;
   static const double letterSpacingStep = 0.5;
-  
+
   // PDF Settings
   static const double minZoom = 0.25;
   static const double maxZoom = 5.0;
   static const double defaultZoom = 1.0;
   static const double zoomStep = 0.25;
-  
+
   // Grid Layout
   static const int mobileGridColumns = 3;
   static const int tabletGridColumns = 4;
   static const int desktopGridColumns = 6;
-  
+
   static const double bookCardAspectRatio = 0.7;
   static const double bookCardBorderRadius = 8.0;
-  
+
   // Breakpoints
   static const double mobileBreakpoint = 600;
   static const double tabletBreakpoint = 900;
@@ -74,34 +74,34 @@ class AppColors {
   static const Color primary = Color(0xFF2196F3);
   static const Color primaryDark = Color(0xFF1976D2);
   static const Color primaryLight = Color(0xFFBBDEFB);
-  
+
   // Accent Colors
   static const Color accent = Color(0xFFFF4081);
   static const Color accentDark = Color(0xFFF50057);
   static const Color accentLight = Color(0xFFFF80AB);
-  
+
   // Background Colors
   static const Color backgroundLight = Color(0xFFFAFAFA);
   static const Color backgroundDark = Color(0xFF121212);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF1E1E1E);
-  
+
   // Text Colors
   static const Color textPrimaryLight = Color(0xFF212121);
   static const Color textSecondaryLight = Color(0xFF757575);
   static const Color textPrimaryDark = Color(0xFFFFFFFF);
   static const Color textSecondaryDark = Color(0xFFB0B0B0);
-  
+
   // EPUB Theme Colors
   static const Color epubLightBackground = Color(0xFFFFFFFF);
   static const Color epubLightText = Color(0xFF000000);
-  
+
   static const Color epubDarkBackground = Color(0xFF1A1A1A);
   static const Color epubDarkText = Color(0xFFE0E0E0);
-  
+
   static const Color epubSepiaBackground = Color(0xFFF4ECD8);
   static const Color epubSepiaText = Color(0xFF5B4636);
-  
+
   // Status Colors
   static const Color success = Color(0xFF4CAF50);
   static const Color warning = Color(0xFFFF9800);
@@ -151,7 +151,8 @@ class AppThemes {
             vertical: AppConstants.defaultPadding,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
+            borderRadius:
+                BorderRadius.circular(AppConstants.defaultBorderRadius),
           ),
         ),
       ),
@@ -199,7 +200,8 @@ class AppThemes {
             vertical: AppConstants.defaultPadding,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
+            borderRadius:
+                BorderRadius.circular(AppConstants.defaultBorderRadius),
           ),
         ),
       ),
@@ -220,7 +222,7 @@ class AppStrings {
   static const String loading = 'Loading...';
   static const String error = 'Error';
   static const String success = 'Success';
-  
+
   // Shelf
   static const String shelfTitle = 'My Books';
   static const String emptyShelf = 'No books yet';
@@ -229,7 +231,7 @@ class AppStrings {
   static const String searchBooks = 'Search books...';
   static const String favorites = 'Favorites';
   static const String recentlyRead = 'Recently Read';
-  
+
   // Book Actions
   static const String open = 'Open';
   static const String addToFavorites = 'Add to Favorites';
@@ -238,8 +240,9 @@ class AppStrings {
   static const String markAsUnread = 'Mark as Unread';
   static const String bookInfo = 'Book Info';
   static const String deleteBook = 'Delete Book';
-  static const String deleteBookConfirm = 'Are you sure you want to delete this book?';
-  
+  static const String deleteBookConfirm =
+      'Are you sure you want to delete this book?';
+
   // Reader
   static const String tableOfContents = 'Table of Contents';
   static const String bookmarks = 'Bookmarks';
@@ -250,14 +253,14 @@ class AppStrings {
   static const String addNote = 'Add Note';
   static const String editNote = 'Edit Note';
   static const String deleteNote = 'Delete Note';
-  
+
   // PDF Reader
   static const String pageOf = 'Page %d of %d';
   static const String zoom = 'Zoom';
   static const String fitWidth = 'Fit Width';
   static const String fitPage = 'Fit Page';
   static const String rotate = 'Rotate';
-  
+
   // EPUB Reader
   static const String fontSize = 'Font Size';
   static const String lineHeight = 'Line Height';
@@ -268,7 +271,7 @@ class AppStrings {
   static const String dark = 'Dark';
   static const String sepia = 'Sepia';
   static const String fontFamily = 'Font Family';
-  
+
   // Settings
   static const String appearance = 'Appearance';
   static const String language = 'Language';
@@ -282,7 +285,7 @@ class AppStrings {
   static const String about = 'About';
   static const String version = 'Version';
   static const String openSourceLicenses = 'Open Source Licenses';
-  
+
   // Languages
   static const String english = 'English';
   static const String chinese = '中文';

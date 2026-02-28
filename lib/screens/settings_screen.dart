@@ -27,31 +27,7 @@ class SettingsScreen extends StatelessWidget {
           _buildThemeTile(context),
           _buildLanguageTile(context),
           
-          const Divider(),
-          
-          // PDF Settings Section
-          _buildSectionHeader(context, l10n.pdfSettings),
-          ListTile(
-            leading: const Icon(Icons.picture_as_pdf),
-            title: Text(l10n.pdfReaderOptions),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              AppRouter.goToPdfSettings(context);
-            },
-          ),
-          
-          const Divider(),
-          
-          // EPUB Settings Section
-          _buildSectionHeader(context, l10n.epubSettings),
-          ListTile(
-            leading: const Icon(Icons.menu_book),
-            title: Text(l10n.epubReaderOptions),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              AppRouter.goToEpubSettings(context);
-            },
-          ),
+
           
           const Divider(),
           

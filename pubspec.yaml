@@ -1,5 +1,5 @@
-name: book_reader_flutter
-description: "一款支持PDF和EPUB的跨平台阅读器，覆盖手机、平板、桌面和网页"
+name: universal_reader
+description: "一款支持 PDF 和 EPUB 的跨平台阅读器，覆盖手机、平板、桌面和网页"
 homepage: https://github.com/hehetoshang/book_reader_flutter
 repository: https://github.com/hehetoshang/book_reader_flutter
 issue_tracker: https://github.com/hehetoshang/book_reader_flutter/issues
