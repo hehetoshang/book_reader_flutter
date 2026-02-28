@@ -109,15 +109,15 @@ class EpubReaderSettingsAdapter extends TypeAdapter<EpubReaderSettings> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return EpubReaderSettings(
-      fontSize: fields[0] as double,
-      lineHeight: fields[1] as double,
-      letterSpacing: fields[2] as double,
-      textAlign: fields[3] as EpubTextAlign,
-      theme: fields[4] as EpubTheme,
+      fontSize: fields[0] as double? ?? 16.0,
+      lineHeight: fields[1] as double? ?? 1.5,
+      letterSpacing: fields[2] as double? ?? 0.0,
+      textAlign: fields[3] as EpubTextAlign? ?? EpubTextAlign.justify,
+      theme: fields[4] as EpubTheme? ?? EpubTheme.light,
       fontFamily: fields[5] as String?,
-      sidePadding: fields[6] as double,
-      topBottomPadding: fields[7] as double,
-      readingMode: fields[8] as ReadingMode,
+      sidePadding: fields[6] as double? ?? 20.0,
+      topBottomPadding: fields[7] as double? ?? 20.0,
+      readingMode: fields[8] as ReadingMode? ?? ReadingMode.page,
     );
   }
 
