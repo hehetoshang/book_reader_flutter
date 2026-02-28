@@ -20,19 +20,8 @@ static void first_frame_cb(MyApplication* self, FlView* view) {
 }
 
 // Implements GApplication::activate.
-// 当应用已运行时再次启动，会触发此方法而不是创建新窗口
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
-  
-  // 如果已经有窗口存在，将其置于前台
-  GList* windows = gtk_application_get_windows(GTK_APPLICATION(application));
-  if (windows != NULL) {
-    GtkWindow* existing_window = GTK_WINDOW(windows->data);
-    gtk_window_present(existing_window);
-    return;
-  }
-  
-  // 否则创建新窗口
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
@@ -153,9 +142,7 @@ MyApplication* my_application_new() {
   // the application to be recognized beyond its binary name.
   g_set_prgname(APPLICATION_ID);
 
-  // 使用 G_APPLICATION_NONE 而不是 G_APPLICATION_NON_UNIQUE 来启用单实例模式
-  // 这样当应用已运行时，会发送 activate 信号给已存在的实例而不是创建新窗口
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID, "flags",
-                                     G_APPLICATION_NONE, nullptr));
+                                     G_APPLICATION_NON_UNIQUE, nullptr));
 }
