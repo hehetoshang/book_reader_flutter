@@ -32,8 +32,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Update submodules
         run: git submodule update --init --recursive
@@ -81,8 +79,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Update submodules
         run: git submodule update --init --recursive
@@ -117,8 +113,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Update submodules
         run: git submodule update --init --recursive
@@ -160,8 +154,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Update submodules
         run: git submodule update --init --recursive
