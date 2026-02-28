@@ -153,47 +153,49 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
             onTap: () {
               FocusScope.of(context).requestFocus(_focusNode);
             },
-            child: Column(
-              children: [
-                // PDF Viewer
-                Expanded(
-                  child: PdfViewer.file(
-                    _book.filePath,
-                    controller: _controller,
-                    params: PdfViewerParams(
-                      // 设置初始缩放 - 使用保存的缩放值
-                      calculateInitialZoom:
-                          (document, controller, fitZoom, coverZoom) {
-                        // 使用 _savedZoom（在 _loadBook 中从数据库读取）
-                        if (_savedZoom != null && _savedZoom != 1.0) {
-                          return _savedZoom!;
-                        }
-                        return fitZoom;
-                      },
-                      onPageChanged: (pageNumber) {
-                        setState(() {
-                          _currentPage = pageNumber ?? 1;
-                        });
-                        _updateProgress();
-                      },
-                      onDocumentChanged: (document) {
-                        if (document != null) {
+            child: ClipRect(
+              child: Column(
+                children: [
+                  // PDF Viewer
+                  Expanded(
+                    child: PdfViewer.file(
+                      _book.filePath,
+                      controller: _controller,
+                      params: PdfViewerParams(
+                        // 设置初始缩放 - 使用保存的缩放值
+                        calculateInitialZoom:
+                            (document, controller, fitZoom, coverZoom) {
+                          // 使用 _savedZoom（在 _loadBook 中从数据库读取）
+                          if (_savedZoom != null && _savedZoom != 1.0) {
+                            return _savedZoom!;
+                          }
+                          return fitZoom;
+                        },
+                        onPageChanged: (pageNumber) {
                           setState(() {
-                            _totalPages = document.pages.length;
+                            _currentPage = pageNumber ?? 1;
                           });
-                          _jumpToSavedPage();
-                        }
-                      },
-                      // 视图准备好后的回调
-                      onViewerReady: (document, controller) {
-                        // 可以在这里添加额外的初始化逻辑
-                      },
+                          _updateProgress();
+                        },
+                        onDocumentChanged: (document) {
+                          if (document != null) {
+                            setState(() {
+                              _totalPages = document.pages.length;
+                            });
+                            _jumpToSavedPage();
+                          }
+                        },
+                        // 视图准备好后的回调
+                        onViewerReady: (document, controller) {
+                          // 可以在这里添加额外的初始化逻辑
+                        },
+                      ),
                     ),
                   ),
-                ),
-                // Bottom toolbar
-                _buildBottomToolbar(),
-              ],
+                  // Bottom toolbar
+                  _buildBottomToolbar(),
+                ],
+              ),
             ),
           ),
         ),

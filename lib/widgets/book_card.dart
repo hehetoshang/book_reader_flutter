@@ -240,63 +240,100 @@ class BookListItem extends StatelessWidget {
               const SizedBox(width: 16),
               // Info
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      book.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      book.author.isNotEmpty ? book.author : l10n.unknown,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      (book.description != null && book.description!.isNotEmpty)
-                          ? _stripHtml(book.description!)
-                          : l10n.noDescription,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          book.fileType == BookFileType.pdf
-                              ? Icons.picture_as_pdf
-                              : Icons.menu_book,
-                          size: 16,
-                          color: Colors.grey,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // 计算标题实际需要的行数
+                      final textPainter = TextPainter(
+                        text: TextSpan(
+                          text: book.title,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          book.fileType.displayName,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        if (book.readingProgress > 0) ...[
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ReadingProgressBar(
-                              progress: book.readingProgress,
-                              showPercentage: true,
-                            ),
+                        maxLines: 2,
+                        textDirection: TextDirection.ltr,
+                      );
+                      textPainter.layout(maxWidth: constraints.maxWidth);
+                      final titleLines = textPainter.computeLineMetrics().length;
+                      
+                      // 标题 1 行时简介最多 2 行，标题 2 行时简介最多 1 行
+                      final descriptionMaxLines = titleLines <= 1 ? 2 : 1;
+                      
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Title
+                              Text(
+                                book.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              // Author - always show, display 'Unknown' if empty
+                              Text(
+                                book.author.isNotEmpty ? book.author : l10n.unknown,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              // Description - show description or placeholder
+                              Text(
+                                (book.description != null && book.description!.isNotEmpty)
+                                    ? _stripHtml(book.description!)
+                                    : l10n.noDescription,
+                                maxLines: descriptionMaxLines,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 1.7),
+                          Row(
+                            children: [
+                              Icon(
+                                book.fileType == BookFileType.pdf
+                                    ? Icons.picture_as_pdf
+                                    : Icons.menu_book,
+                                size: 16,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                book.fileType.displayName,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              if (book.readingProgress > 0) ...[
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: ReadingProgressBar(
+                                    progress: book.readingProgress,
+                                    showPercentage: true,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
-                      ],
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
               ),
               // Favorite indicator

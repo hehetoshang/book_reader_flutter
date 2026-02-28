@@ -53,11 +53,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionHeader(context, l10n.appearance),
           _buildThemeTile(context),
           _buildLanguageTile(context),
-          
 
-          
           const Divider(),
-          
+
           // Data Management Section
           _buildSectionHeader(context, l10n.dataManagement),
           ListTile(
@@ -78,9 +76,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: () => _clearAllData(context),
           ),
-          
+
           const Divider(),
-          
+
           // About Section
           _buildSectionHeader(context, l10n.about),
           ListTile(
@@ -115,9 +113,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
@@ -167,13 +165,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           if (code.isEmpty) return l10n.languageSystem; // System language
           return code == 'zh' ? '中文' : 'English';
         }
-        
+
+        // Determine dropdown value
+        String getDropdownValue() {
+          if (settings.languageCode.isEmpty) return 'system';
+          return settings.languageCode;
+        }
+
         return ListTile(
           leading: const Icon(Icons.language),
           title: Text(l10n.language),
           subtitle: Text(getLanguageDisplayText(settings.languageCode)),
           trailing: DropdownButton<String>(
-            value: settings.languageCode.isEmpty ? 'system' : settings.languageCode,
+            value: getDropdownValue(),
             underline: const SizedBox(),
             items: [
               DropdownMenuItem(
