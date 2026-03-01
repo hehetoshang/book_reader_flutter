@@ -258,12 +258,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void showSnackBar(SnackBar snackBar) {
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 
   void showErrorSnackBar(String message) {
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    }
   }
 }

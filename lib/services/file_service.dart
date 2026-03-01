@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:math';
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
