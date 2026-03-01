@@ -212,18 +212,26 @@ class _ShelfScreenState extends State<ShelfScreen> {
       if (files.isEmpty) return;
 
       if (!mounted) return;
-      context.showSnackBar('Importing ${files.length} book(s)...');
+      final importCount = files.length;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Importing $importCount book(s)...')),
+      );
 
       final books = await _fileService.importFiles(files);
       
-      if (books.isNotEmpty) {
+      if (books.isNotEmpty && mounted) {
         await context.read<BookProvider>().addBooks(books);
-        if (!mounted) return;
-        context.showSnackBar('Imported ${books.length} book(s) successfully');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Imported ${books.length} book(s) successfully')),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
-      context.showErrorSnackBar('Failed to import books: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to import books: $e'), backgroundColor: Colors.red),
+      );
     }
   }
 

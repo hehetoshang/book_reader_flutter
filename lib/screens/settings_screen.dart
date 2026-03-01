@@ -222,7 +222,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     try {
-      // TODO: Implement data export
       if (mounted) context.showSnackBar(l10n.dataExportComingSoon);
     } catch (e) {
       if (mounted) context.showErrorSnackBar(l10n.failedToExportData(e.toString()));
@@ -233,7 +232,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     try {
-      // TODO: Implement data import
       if (mounted) context.showSnackBar(l10n.dataImportComingSoon);
     } catch (e) {
       if (mounted) context.showErrorSnackBar(l10n.failedToImportData(e.toString()));
@@ -252,10 +250,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (confirmed == true && mounted) {
       try {
         await context.read<BookProvider>().deleteAllBooks();
-        if (mounted) context.showSnackBar(l10n.allDataCleared);
+        if (mounted) showSnackBar(SnackBar(content: Text(l10n.allDataCleared)));
       } catch (e) {
-        if (mounted) context.showErrorSnackBar(l10n.failedToClearData(e.toString()));
+        if (mounted) showErrorSnackBar(l10n.failedToClearData(e.toString()));
       }
     }
+  }
+
+  void showSnackBar(SnackBar snackBar) {
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void showErrorSnackBar(String message) {
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 }
