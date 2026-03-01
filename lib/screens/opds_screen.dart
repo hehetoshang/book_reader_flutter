@@ -362,7 +362,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
     if (!_validateUrl(_urlController.text)) {
       setState(() {
         _testResult = false;
-        _testError = 'Invalid URL format';
+        _testError = 'URL 格式无效';
       });
       return;
     }
@@ -379,13 +379,25 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
       setState(() {
         _isTesting = false;
         _testResult = success;
-        _testError = success ? null : 'Failed to connect';
+        _testError = success ? null : '无法连接到 OPDS 服务器';
       });
     } catch (e) {
       setState(() {
         _isTesting = false;
         _testResult = false;
-        _testError = e.toString();
+        // 提取有用的错误信息
+        final errorMessage = e.toString();
+        if (errorMessage.contains('404')) {
+          _testError = '页面未找到 (404)';
+        } else if (errorMessage.contains('500')) {
+          _testError = '服务器错误 (500)';
+        } else if (errorMessage.contains('401') || errorMessage.contains('403')) {
+          _testError = '认证失败，请检查用户名和密码';
+        } else if (errorMessage.contains('Network') || errorMessage.contains('Socket')) {
+          _testError = '网络连接失败，请检查网络';
+        } else {
+          _testError = '连接失败：${e.toString().split(': ').last}';
+        }
       });
     }
   }
@@ -500,7 +512,8 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                  labelText: l10n.description,
+                  labelText: l10n.catalogDescription,
+                  hintText: l10n.catalogDescriptionHint ?? '',
                   prefixIcon: const Icon(Icons.description),
                   border: const OutlineInputBorder(),
                 ),
@@ -526,7 +539,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
                 obscureText: true,
               ),
               const SizedBox(height: 16),
-              if (_testError != null)
+              if (_testResult != null)
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -550,7 +563,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
                         child: Text(
                           _testResult == true
                               ? l10n.connectionSuccessful
-                              : _testError!,
+                              : (_testError ?? l10n.connectionFailed),
                           style: TextStyle(
                             color: _testResult == true
                                 ? Theme.of(context).colorScheme.onPrimaryContainer

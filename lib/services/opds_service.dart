@@ -18,17 +18,42 @@ class OpdsService {
 
       if (response.statusCode == 200) {
         return parseCatalog(response.body);
+      } else if (response.statusCode == 404) {
+        throw OpdsHttpException(
+          'Catalog not found (404). The URL may be incorrect or the resource has been removed.',
+          statusCode: 404,
+        );
+      } else if (response.statusCode >= 500 && response.statusCode < 600) {
+        throw OpdsHttpException(
+          'Server error (${response.statusCode}). The server encountered an internal error.',
+          statusCode: response.statusCode,
+        );
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        throw OpdsHttpException(
+          'Authentication failed (${response.statusCode}). Please check your credentials.',
+          statusCode: response.statusCode,
+        );
+      } else if (response.statusCode >= 400 && response.statusCode < 500) {
+        throw OpdsHttpException(
+          'Client error (${response.statusCode}). ${response.reasonPhrase}',
+          statusCode: response.statusCode,
+        );
       } else {
         throw OpdsHttpException(
-          'Failed to fetch catalog: ${response.statusCode}',
+          'Unexpected response: ${response.statusCode}. ${response.reasonPhrase}',
           statusCode: response.statusCode,
         );
       }
     } on http.ClientException catch (e) {
-      throw OpdsNetworkException('Network error: ${e.message}');
+      throw OpdsNetworkException('Network error: ${e.message}. Please check your internet connection.');
     } on FormatException catch (e) {
       throw OpdsParseException('Invalid URL format: ${e.message}');
+    } on SocketException catch (e) {
+      throw OpdsNetworkException('Cannot connect to server: ${e.message}. Please check your network connection.');
     } catch (e) {
+      if (e is OpdsException) {
+        rethrow;
+      }
       throw OpdsException('Unexpected error fetching catalog: ${e.toString()}');
     }
   }

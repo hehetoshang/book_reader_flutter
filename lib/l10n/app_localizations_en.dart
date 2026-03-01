@@ -278,7 +278,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get catalogDescription => 'Catalog Description';
 
   @override
-  String get catalogUrlHint => 'Enter the OPDS catalog Atom feed URL';
+  String get catalogDescriptionHint => 'Optional: Describe this OPDS catalog';
+
+  @override
+  String get catalogUrlHint => 'Enter OPDS catalog Atom feed URL';
 
   @override
   String get testConnection => 'Test Connection';
@@ -405,4 +408,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get browseAndDownloadOnlineBooks => 'Browse and download online books';
+
+  @override
+  String get errorPageNotFound => 'Page Not Found (404)';
+
+  @override
+  String get errorPageNotFoundSuggestion => 'The requested catalog page does not exist. Please check the URL.';
+
+  @override
+  String errorServer(String statusCode) => 'Server Error ($statusCode)';
+
+  @override
+  String get errorServerSuggestion => 'The server encountered an internal error. Please try again later.';
+
+  @override
+  String errorAuthFailed(String statusCode) => 'Authentication Failed ($statusCode)';
+
+  @override
+  String get errorAuthFailedSuggestion => 'Authentication required. Please check your credentials in settings.';
+
+  @override
+  String get errorNetwork => 'Network Connection Failed';
+
+  @override
+  String get errorNetworkSuggestion => 'Please check your network connection and try again.';
+
+  @override
+  String get errorLoadFailed => 'Load Failed';
+
+  @override
+  String get errorLoadFailedSuggestion => 'An unknown error occurred. You can try again.';
 }

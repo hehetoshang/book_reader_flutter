@@ -62,7 +62,7 @@ class SettingsProvider extends ChangeNotifier {
   String? get epubFontFamily => epubSettings.fontFamily;
   double get epubSidePadding => epubSettings.sidePadding;
   double get epubTopBottomPadding => epubSettings.topBottomPadding;
-  ReadingMode get epubReadingMode => epubSettings.readingMode;
+  ReadingMode get epubReadingMode => epubSettings.readingMode ?? ReadingMode.page;
 
   // Window settings getters (desktop only)
   WindowSettings? get windowSettings => settings.windowSettings;

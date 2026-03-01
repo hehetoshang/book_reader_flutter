@@ -278,6 +278,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get catalogDescription => '目录描述';
 
   @override
+  String get catalogDescriptionHint => '可选：描述这个 OPDS 目录';
+
+  @override
   String get catalogUrlHint => '输入 OPDS 目录的 Atom feed URL';
 
   @override
@@ -405,4 +408,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browseAndDownloadOnlineBooks => '浏览和下载在线书籍';
+
+  @override
+  String get errorPageNotFound => '页面未找到 (404)';
+
+  @override
+  String get errorPageNotFoundSuggestion => '请求的目录页面不存在，请检查 URL 是否正确';
+
+  @override
+  String errorServer(String statusCode) => '服务器错误 ($statusCode)';
+
+  @override
+  String get errorServerSuggestion => '服务器遇到内部错误，请稍后重试';
+
+  @override
+  String errorAuthFailed(String statusCode) => '认证失败 ($statusCode)';
+
+  @override
+  String get errorAuthFailedSuggestion => '需要身份验证，请在设置中检查您的凭据';
+
+  @override
+  String get errorNetwork => '网络连接失败';
+
+  @override
+  String get errorNetworkSuggestion => '请检查您的网络连接后重试';
+
+  @override
+  String get errorLoadFailed => '加载失败';
+
+  @override
+  String get errorLoadFailedSuggestion => '发生未知错误，您可以尝试重试';
 }

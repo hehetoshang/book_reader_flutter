@@ -62,7 +62,8 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,7 +84,8 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -617,10 +620,16 @@ abstract class AppLocalizations {
   /// **'Catalog Description'**
   String get catalogDescription;
 
+  /// No description provided for @catalogDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: Describe this OPDS catalog'**
+  String get catalogDescriptionHint;
+
   /// No description provided for @catalogUrlHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter the OPDS catalog Atom feed URL'**
+  /// **'Enter OPDS catalog Atom feed URL'**
   String get catalogUrlHint;
 
   /// No description provided for @testConnection.
@@ -632,13 +641,13 @@ abstract class AppLocalizations {
   /// No description provided for @connectionSuccessful.
   ///
   /// In en, this message translates to:
-  /// **'Connection Successful'**
+  /// **'Connection successful'**
   String get connectionSuccessful;
 
   /// No description provided for @connectionFailed.
   ///
   /// In en, this message translates to:
-  /// **'Connection Failed'**
+  /// **'Connection failed'**
   String get connectionFailed;
 
   /// No description provided for @downloading.
@@ -874,9 +883,70 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Browse and download online books'**
   String get browseAndDownloadOnlineBooks;
+
+  /// No description provided for @errorPageNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Not Found (404)'**
+  String get errorPageNotFound;
+
+  /// No description provided for @errorPageNotFoundSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested catalog page does not exist. Please check the URL.'**
+  String get errorPageNotFoundSuggestion;
+
+  /// No description provided for @errorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server Error ({statusCode})'**
+  String errorServer(String statusCode);
+
+  /// No description provided for @errorServerSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'The server encountered an internal error. Please try again later.'**
+  String get errorServerSuggestion;
+
+  /// No description provided for @errorAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication Failed ({statusCode})'**
+  String errorAuthFailed(String statusCode);
+
+  /// No description provided for @errorAuthFailedSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication required. Please check your credentials in settings.'**
+  String get errorAuthFailedSuggestion;
+
+  /// No description provided for @errorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Network Connection Failed'**
+  String get errorNetwork;
+
+  /// No description provided for @errorNetworkSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your network connection and try again.'**
+  String get errorNetworkSuggestion;
+
+  /// No description provided for @errorLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Failed'**
+  String get errorLoadFailed;
+
+  /// No description provided for @errorLoadFailedSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'An unknown error occurred. You can try again.'**
+  String get errorLoadFailedSuggestion;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -885,25 +955,25 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'zh': return AppLocalizationsZh();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

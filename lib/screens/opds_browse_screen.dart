@@ -8,6 +8,7 @@ import '../models/models.dart';
 import '../providers/opds_provider.dart';
 import '../providers/book_provider.dart';
 import '../services/file_service.dart';
+import '../services/opds_service.dart';
 
 class OpdsBrowseScreen extends StatefulWidget {
   final OpdsCatalogConfig catalog;
@@ -143,33 +144,85 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
 
   Widget _buildBody(BuildContext context, AppLocalizations l10n) {
     if (_isLoading && _catalog == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('加载中...'),
+          ],
+        ),
+      );
     }
 
     if (_error != null) {
+      // 根据错误类型显示不同的图标和提示
+      final isNetworkError =
+          _error!.contains('Network') || _error!.contains('connect');
+      final isNotFound = _error!.contains('404');
+      final isServerError =
+          _error!.contains('500') || _error!.contains('Server error');
+      final isAuthError = _error!.contains('401') || _error!.contains('403');
+
+      IconData errorIcon;
+      String errorMessage;
+      String suggestion;
+
+      if (isNotFound) {
+        errorIcon = Icons.find_in_page_outlined;
+        errorMessage = l10n.errorPageNotFound;
+        suggestion = l10n.errorPageNotFoundSuggestion;
+      } else if (isServerError) {
+        errorIcon = Icons.cloud_off_outlined;
+        errorMessage = l10n.errorServer('500');
+        suggestion = l10n.errorServerSuggestion;
+      } else if (isAuthError) {
+        errorIcon = Icons.lock_outline;
+        // 提取状态码
+        final statusCode = _error!.contains('401') ? '401' : '403';
+        errorMessage = l10n.errorAuthFailed(statusCode);
+        suggestion = l10n.errorAuthFailedSuggestion;
+      } else if (isNetworkError) {
+        errorIcon = Icons.wifi_off_outlined;
+        errorMessage = l10n.errorNetwork;
+        suggestion = l10n.errorNetworkSuggestion;
+      } else {
+        errorIcon = Icons.error_outline;
+        errorMessage = l10n.errorLoadFailed;
+        suggestion = l10n.errorLoadFailedSuggestion;
+      }
+
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            Icon(
+              errorIcon,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text(
-              l10n.failedToLoadOpdsCatalog(_error!),
-              style: Theme.of(context).textTheme.titleMedium,
+              errorMessage,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                _error!,
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
-              ),
+            Text(
+              suggestion,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () => _loadCatalog(_currentUrl),
-              child: Text(l10n.retry),
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -186,11 +239,8 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
       children: [
         if (_catalog!.navigationLinks.isNotEmpty)
           _buildNavigationSection(context, l10n),
-        if (_catalog!.facetGroups.isNotEmpty)
-          _buildFacetSection(context, l10n),
-        Expanded(
-          child: _buildEntriesList(context, l10n),
-        ),
+        if (_catalog!.facetGroups.isNotEmpty) _buildFacetSection(context, l10n),
+        Expanded(child: _buildEntriesList(context, l10n)),
       ],
     );
   }
@@ -266,7 +316,13 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
   Widget _buildEntriesList(BuildContext context, AppLocalizations l10n) {
     final entries = _catalog!.entries;
 
-    if (entries.isEmpty) {
+    // 过滤出书籍条目（有 acquisition link 的才是书籍）
+    final bookEntries =
+        entries.where((entry) => entry.acquisitionLinks.isNotEmpty).toList();
+    final navigationEntries =
+        entries.where((entry) => entry.acquisitionLinks.isEmpty).toList();
+
+    if (bookEntries.isEmpty && navigationEntries.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -283,36 +339,105 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
       );
     }
 
-    return GridView.builder(
+    // 如果有导航条目，显示为文件夹列表
+    if (navigationEntries.isNotEmpty) {
+      return ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(8),
+        itemCount: navigationEntries.length +
+            bookEntries.length +
+            (_catalog!.hasMoreResults ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= navigationEntries.length + bookEntries.length) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // 先显示导航条目（文件夹）
+          if (index < navigationEntries.length) {
+            final entry = navigationEntries[index];
+            return _NavigationItem(
+              entry: entry,
+              onTap: () => _navigateToCategory(entry),
+            );
+          }
+
+          // 然后显示书籍条目
+          final bookIndex = index - navigationEntries.length;
+          final entry = bookEntries[bookIndex];
+          return _BookListItem(
+            entry: entry,
+            onTap: () => _showBookDetails(entry),
+          );
+        },
+      );
+    }
+
+    // 只有书籍条目
+    return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.65,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemCount: entries.length + (_catalog!.hasMoreResults ? 1 : 0),
+      itemCount: bookEntries.length + (_catalog!.hasMoreResults ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index >= entries.length) {
+        if (index >= bookEntries.length) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final entry = entries[index];
-        return _BookGridItem(
+        final entry = bookEntries[index];
+        return _BookListItem(
           entry: entry,
           onTap: () => _showBookDetails(entry),
         );
       },
     );
   }
+
+  String _resolveUrl(String url) {
+    // 如果已经是完整 URL，直接返回
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // 如果是相对路径（以 / 开头），需要拼接基础 URL
+    if (url.startsWith('/')) {
+      final uri = Uri.parse(widget.catalog.url);
+      return '${uri.scheme}://${uri.host}${url}';
+    }
+
+    // 其他情况，相对于当前 URL
+    return Uri.parse(widget.catalog.url).resolve(url).toString();
+  }
+
+  void _navigateToCategory(OpdsEntry entry) {
+    final link = entry.links.firstWhere(
+      (link) => link.isNavigationLink || link.type?.contains('feed') == true,
+      orElse: () => entry.links.first,
+    );
+    if (link.href.isNotEmpty) {
+      final resolvedUrl = _resolveUrl(link.href);
+      // 创建新的 catalog 配置，使用新的 URL 和临时 ID
+      final newCatalog = OpdsCatalogConfig(
+        id: '${widget.catalog.id}#${Uri.encodeComponent(resolvedUrl)}', // 使用唯一 ID
+        title: entry.title, // 使用分类标题
+        url: resolvedUrl,
+        description: widget.catalog.description,
+        isEnabled: widget.catalog.isEnabled,
+      );
+      // 使用 push 导航到新页面，实现页面过渡动画
+      context.push(
+        '/opds/browse',
+        extra: {
+          'catalog': newCatalog,
+        },
+      );
+    }
+  }
 }
 
-class _BookGridItem extends StatelessWidget {
+class _NavigationItem extends StatelessWidget {
   final OpdsEntry entry;
   final VoidCallback onTap;
 
-  const _BookGridItem({
+  const _NavigationItem({
     required this.entry,
     required this.onTap,
   });
@@ -320,70 +445,150 @@ class _BookGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      clipBehavior: Clip.antiAlias,
+      margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // 文件夹图标
+              Icon(
+                Icons.folder,
+                size: 32,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 16),
+              // 分类名称
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    if (entry.content != null &&
+                        entry.content!.value != null &&
+                        entry.content!.value!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        entry.content!.value!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // 箭头图标
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BookListItem extends StatelessWidget {
+  final OpdsEntry entry;
+  final VoidCallback onTap;
+
+  const _BookListItem({
+    required this.entry,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 封面图片（小图标）
+              Container(
+                width: 60,
+                height: 80,
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: entry.coverUrl != null
                     ? Image.network(
                         entry.coverUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          return Center(
+                          return const Center(
                             child: Icon(
                               Icons.book,
-                              size: 48,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                              size: 24,
                             ),
                           );
                         },
                       )
-                    : Center(
+                    : const Center(
                         child: Icon(
                           Icons.book,
-                          size: 48,
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
+                          size: 24,
                         ),
                       ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  if (entry.primaryAuthor != null) ...[
-                    const SizedBox(height: 4),
+              const SizedBox(width: 12),
+              // 书籍信息
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      entry.primaryAuthor!,
-                      maxLines: 1,
+                      entry.title,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
                     ),
+                    const SizedBox(height: 4),
+                    if (entry.primaryAuthor != null)
+                      Text(
+                        entry.primaryAuthor!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    if (entry.summary != null && entry.summary!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        entry.summary!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -407,6 +612,22 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
   bool _isDownloading = false;
   double _downloadProgress = 0;
 
+  String _resolveUrl(String url) {
+    // 如果已经是完整 URL，直接返回
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // 如果是相对路径（以 / 开头），需要拼接基础 URL
+    if (url.startsWith('/')) {
+      final uri = Uri.parse(widget.catalog.url);
+      return '${uri.scheme}://${uri.host}${url}';
+    }
+
+    // 其他情况，相对于当前 URL
+    return Uri.parse(widget.catalog.url).resolve(url).toString();
+  }
+
   Future<void> _downloadAndImport() async {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.read<OpdsProvider>();
@@ -428,8 +649,12 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
       final extension = _getFileExtension(acquisitionLink.type);
       final filePath = '${directory.path}/$fileName.$extension';
 
-      await provider.downloadFile(
-        acquisitionLink.href,
+      // 解析 URL（处理相对路径）
+      final downloadUrl = _resolveUrl(acquisitionLink.href);
+
+      final opdsService = OpdsService();
+      await opdsService.downloadFile(
+        downloadUrl,
         filePath,
         (progress) {
           setState(() {
@@ -438,8 +663,6 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
         },
       );
 
-      final fileService = FileService();
-      
       // 手动处理下载的文件导入
       final book = Book(
         id: widget.book.id,
@@ -448,7 +671,9 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
         description: widget.book.summary,
         coverPath: null,
         filePath: filePath,
-        fileType: acquisitionLink.type?.contains('pdf') == true ? BookFileType.pdf : BookFileType.epub,
+        fileType: acquisitionLink.type?.contains('pdf') == true
+            ? BookFileType.pdf
+            : BookFileType.epub,
         addedAt: DateTime.now(),
       );
       await bookProvider.addBook(book);
@@ -525,8 +750,9 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
                           child: Icon(
                             Icons.book,
                             size: 64,
-                            color:
-                                Theme.of(context).colorScheme.onPrimaryContainer,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
                           ),
                         ),
                 ),
@@ -555,8 +781,7 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
                       spacing: 8,
                       children: widget.book.authors.map((author) {
                         return Chip(
-                          avatar:
-                              const Icon(Icons.person, size: 18),
+                          avatar: const Icon(Icons.person, size: 18),
                           label: Text(author.name),
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
@@ -582,8 +807,7 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
                         Icon(
                           Icons.business,
                           size: 18,
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -600,8 +824,7 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
                         Icon(
                           Icons.language,
                           size: 18,
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -618,8 +841,7 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
                         Icon(
                           Icons.calendar_today,
                           size: 18,
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 8),
                         Text(

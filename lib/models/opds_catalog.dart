@@ -117,15 +117,21 @@ class OpdsEntry {
   List<OpdsLink> get navigationLinks =>
       links.where((link) => link.isNavigationLink).toList();
 
-  OpdsLink? get selfLink => links.firstWhere(
-        (link) => link.isSelfLink,
-        orElse: () => throw Exception('No self link found'),
-      );
+  OpdsLink? get selfLink {
+    try {
+      return links.firstWhere((link) => link.isSelfLink);
+    } catch (e) {
+      return null;
+    }
+  }
 
-  OpdsLink? get thumbnailLink => links.firstWhere(
-        (link) => link.type?.startsWith('image/') ?? false,
-        orElse: () => throw Exception('No thumbnail link found'),
-      );
+  OpdsLink? get thumbnailLink {
+    try {
+      return links.firstWhere((link) => link.type?.startsWith('image/') ?? false);
+    } catch (e) {
+      return null;
+    }
+  }
 
   String? get coverUrl => thumbnail ?? thumbnailLink?.href;
 

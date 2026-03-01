@@ -177,7 +177,7 @@ class EpubReaderSettings extends HiveObject {
   double topBottomPadding;
 
   @HiveField(8)
-  ReadingMode readingMode;
+  ReadingMode? readingMode;
 
   EpubReaderSettings({
     this.fontSize = 16.0,
@@ -188,8 +188,8 @@ class EpubReaderSettings extends HiveObject {
     this.fontFamily,
     this.sidePadding = 20.0,
     this.topBottomPadding = 20.0,
-    this.readingMode = ReadingMode.page,
-  });
+    ReadingMode? readingMode,
+  }) : readingMode = readingMode ?? ReadingMode.page;
 
   EpubReaderSettings copyWith({
     double? fontSize,
@@ -211,7 +211,7 @@ class EpubReaderSettings extends HiveObject {
       fontFamily: fontFamily ?? this.fontFamily,
       sidePadding: sidePadding ?? this.sidePadding,
       topBottomPadding: topBottomPadding ?? this.topBottomPadding,
-      readingMode: readingMode ?? this.readingMode,
+      readingMode: readingMode ?? this.readingMode ?? ReadingMode.page,
     );
   }
 }
