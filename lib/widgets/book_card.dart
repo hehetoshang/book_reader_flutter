@@ -48,7 +48,8 @@ class BookCard extends StatelessWidget {
             // Book Info - Expanded 确保占满剩余空间
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0), // 减少上下内边距
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 12.0), // 减少上下内边距
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     // 计算标题实际需要的行数
@@ -56,21 +57,22 @@ class BookCard extends StatelessWidget {
                       text: TextSpan(
                         text: book.title,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       maxLines: 2,
                       textDirection: TextDirection.ltr,
                     );
                     textPainter.layout(maxWidth: constraints.maxWidth);
                     final titleLines = textPainter.computeLineMetrics().length;
-                    
+
                     // 标题1行时简介最多2行，标题2行时简介最多1行
                     final descriptionMaxLines = titleLines <= 1 ? 2 : 1;
-                    
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // 让内容分布均匀
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween, // 让内容分布均匀
                       children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,14 +83,19 @@ class BookCard extends StatelessWidget {
                               book.title,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 1),
                             // Author - always show, display 'Unknown' if empty
                             Text(
-                              book.author.isNotEmpty ? book.author : l10n.unknown,
+                              book.author.isNotEmpty
+                                  ? book.author
+                                  : l10n.unknown,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -96,10 +103,11 @@ class BookCard extends StatelessWidget {
                                 color: Colors.grey[700],
                               ),
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 1),
                             // Description - show description or placeholder
                             Text(
-                              (book.description != null && book.description!.isNotEmpty)
+                              (book.description != null &&
+                                      book.description!.isNotEmpty)
                                   ? _stripHtml(book.description!)
                                   : l10n.noDescription,
                               maxLines: descriptionMaxLines,
@@ -111,7 +119,7 @@ class BookCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 1.7),
+                        const SizedBox(height: 1),
                         Row(
                           children: [
                             Icon(
@@ -159,7 +167,8 @@ class BookCard extends StatelessWidget {
           width: 60,
           height: 80,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
+          errorBuilder: (context, error, stackTrace) =>
+              _buildPlaceholder(context),
         ),
       );
     }
@@ -240,26 +249,29 @@ class BookListItem extends StatelessWidget {
               // Info
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 12.0),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       // 计算标题实际需要的行数
                       final textPainter = TextPainter(
                         text: TextSpan(
                           text: book.title,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         maxLines: 2,
                         textDirection: TextDirection.ltr,
                       );
                       textPainter.layout(maxWidth: constraints.maxWidth);
-                      final titleLines = textPainter.computeLineMetrics().length;
-                      
+                      final titleLines =
+                          textPainter.computeLineMetrics().length;
+
                       // 标题 1 行时简介最多 2 行，标题 2 行时简介最多 1 行
                       final descriptionMaxLines = titleLines <= 1 ? 2 : 1;
-                      
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -273,14 +285,19 @@ class BookListItem extends StatelessWidget {
                                 book.title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               // Author - always show, display 'Unknown' if empty
                               Text(
-                                book.author.isNotEmpty ? book.author : l10n.unknown,
+                                book.author.isNotEmpty
+                                    ? book.author
+                                    : l10n.unknown,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -288,10 +305,11 @@ class BookListItem extends StatelessWidget {
                                   color: Colors.grey[700],
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               // Description - show description or placeholder
                               Text(
-                                (book.description != null && book.description!.isNotEmpty)
+                                (book.description != null &&
+                                        book.description!.isNotEmpty)
                                     ? _stripHtml(book.description!)
                                     : l10n.noDescription,
                                 maxLines: descriptionMaxLines,
@@ -303,7 +321,7 @@ class BookListItem extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 1.7),
+                          const SizedBox(height: 1),
                           Row(
                             children: [
                               Icon(
@@ -358,7 +376,8 @@ class BookListItem extends StatelessWidget {
           width: 60,
           height: 80,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
+          errorBuilder: (context, error, stackTrace) =>
+              _buildPlaceholder(context),
         ),
       );
     }

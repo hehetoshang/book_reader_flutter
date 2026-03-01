@@ -81,7 +81,7 @@ class _OpdsScreenState extends State<OpdsScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          ElevatedButton.icon(
+          FilledButton.icon(
             onPressed: () => _showAddDialog(context),
             icon: const Icon(Icons.add),
             label: Text(l10n.addOpdsCatalog),
@@ -117,16 +117,19 @@ class _OpdsScreenState extends State<OpdsScreen> {
         title: Text(l10n.deleteOpdsCatalog),
         content: Text(l10n.deleteOpdsCatalogConfirm(catalog.displayTitle)),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme.of(context).colorScheme.onError,
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.delete),
-          ),
-        ],
+          child: Text(l10n.delete),
+        ),
+      ],
       ),
     );
 
@@ -192,114 +195,137 @@ class _CatalogListItem extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: catalog.isEnabled
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Icon(
-            Icons.menu_book,
-            color: catalog.isEnabled
-                ? Theme.of(context).colorScheme.onPrimaryContainer
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: () => _showContextMenu(context),
+        onSecondaryTap: () => _showContextMenu(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: catalog.isEnabled
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.menu_book,
+                  color: catalog.isEnabled
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      catalog.displayTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      catalog.url,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    if (catalog.description != null &&
+                        catalog.description!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        catalog.description!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (!catalog.isEnabled)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    l10n.disabled,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
-        title: Text(
-          catalog.displayTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              catalog.url,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            if (catalog.description != null && catalog.description!.isNotEmpty)
-              Text(
-                catalog.description!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!catalog.isEnabled)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  l10n.disabled,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                switch (value) {
-                  case 'edit':
-                    onEdit();
-                    break;
-                  case 'delete':
-                    onDelete();
-                    break;
-                  case 'toggle':
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: ListTile(
-                    leading: const Icon(Icons.edit),
-                    title: Text(l10n.edit),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'toggle',
-                  child: ListTile(
-                    leading: Icon(
-                      catalog.isEnabled ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    title: Text(catalog.isEnabled ? l10n.disable : l10n.enable),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: ListTile(
-                    leading: Icon(Icons.delete, color: Colors.red),
-                    title: Text(
-                      l10n.delete,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        onTap: catalog.isEnabled ? onTap : null,
-        onLongPress: catalog.isEnabled ? onTap : null,
       ),
     );
+  }
+
+  void _showContextMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final relativeRect = RelativeRect.fromRect(
+      Rect.fromPoints(
+        box.localToGlobal(box.size.center(Offset.zero),
+            ancestor: overlay),
+        box.localToGlobal(box.size.center(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu<String>(
+      context: context,
+      position: relativeRect,
+      items: [
+        PopupMenuItem(
+          value: 'edit',
+          child: ListTile(
+            leading: const Icon(Icons.edit),
+            title: Text(l10n.edit),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'delete',
+          child: ListTile(
+            leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+            title: Text(
+              l10n.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value != null) {
+        switch (value) {
+          case 'edit':
+            onEdit();
+            break;
+          case 'delete':
+            onDelete();
+            break;
+        }
+      }
+    });
   }
 }
 
@@ -579,23 +605,25 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        TextButton.icon(
           onPressed: _isTesting ? null : _testConnection,
-          child: _isTesting
+          icon: _isTesting
               ? SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(l10n.testConnection),
+              : const Icon(Icons.cloud_sync),
+          label: Text(l10n.testConnection),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(l10n.cancel),
         ),
-        FilledButton(
+        FilledButton.icon(
           onPressed: _save,
-          child: Text(widget.catalog == null ? l10n.add : l10n.save),
+          icon: Icon(widget.catalog == null ? Icons.add : Icons.save),
+          label: Text(widget.catalog == null ? l10n.add : l10n.save),
         ),
       ],
     );

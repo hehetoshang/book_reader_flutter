@@ -219,7 +219,7 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
+            FilledButton.icon(
               onPressed: () => _loadCatalog(_currentUrl),
               icon: const Icon(Icons.refresh),
               label: Text(l10n.retry),
@@ -364,8 +364,11 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
           // 然后显示书籍条目
           final bookIndex = index - navigationEntries.length;
           final entry = bookEntries[bookIndex];
+          // 解析封面 URL
+          final coverUrl = _resolveCoverUrl(entry.coverUrl);
           return _BookListItem(
             entry: entry,
+            coverUrl: coverUrl,
             onTap: () => _showBookDetails(entry),
           );
         },
@@ -383,12 +386,33 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
         }
 
         final entry = bookEntries[index];
+        // 解析封面 URL
+        final coverUrl = _resolveCoverUrl(entry.coverUrl);
         return _BookListItem(
           entry: entry,
+          coverUrl: coverUrl,
           onTap: () => _showBookDetails(entry),
         );
       },
     );
+  }
+
+  String? _resolveCoverUrl(String? coverUrl) {
+    if (coverUrl == null) return null;
+
+    // 如果已经是完整 URL，直接返回
+    if (coverUrl.startsWith('http://') || coverUrl.startsWith('https://')) {
+      return coverUrl;
+    }
+
+    // 如果是相对路径（以 / 开头），需要拼接基础 URL
+    if (coverUrl.startsWith('/')) {
+      final uri = Uri.parse(widget.catalog.url);
+      return '${uri.scheme}://${uri.host}$coverUrl';
+    }
+
+    // 其他情况，相对于当前 URL
+    return Uri.parse(widget.catalog.url).resolve(coverUrl).toString();
   }
 
   String _resolveUrl(String url) {
@@ -506,10 +530,12 @@ class _NavigationItem extends StatelessWidget {
 
 class _BookListItem extends StatelessWidget {
   final OpdsEntry entry;
+  final String? coverUrl;
   final VoidCallback onTap;
 
   const _BookListItem({
     required this.entry,
+    this.coverUrl,
     required this.onTap,
   });
 
@@ -529,9 +555,9 @@ class _BookListItem extends StatelessWidget {
                 width: 60,
                 height: 80,
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: entry.coverUrl != null
+                child: coverUrl != null
                     ? Image.network(
-                        entry.coverUrl!,
+                        coverUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return const Center(
@@ -612,6 +638,24 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
   bool _isDownloading = false;
   double _downloadProgress = 0;
 
+  String? _resolveCoverUrl(String? coverUrl) {
+    if (coverUrl == null) return null;
+
+    // 如果已经是完整 URL，直接返回
+    if (coverUrl.startsWith('http://') || coverUrl.startsWith('https://')) {
+      return coverUrl;
+    }
+
+    // 如果是相对路径（以 / 开头），需要拼接基础 URL
+    if (coverUrl.startsWith('/')) {
+      final uri = Uri.parse(widget.catalog.url);
+      return '${uri.scheme}://${uri.host}$coverUrl';
+    }
+
+    // 其他情况，相对于当前 URL
+    return Uri.parse(widget.catalog.url).resolve(coverUrl).toString();
+  }
+
   String _resolveUrl(String url) {
     // 如果已经是完整 URL，直接返回
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -644,10 +688,11 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
 
     try {
       final directory = await getTemporaryDirectory();
-      final fileName =
-          '${widget.book.id}_${DateTime.now().millisecondsSinceEpoch}';
+      // 清理 ID 中的非法文件名字符（替换冒号等）
+      final safeId = widget.book.id.replaceAll(RegExp(r'[:/\\<>|?*"]'), '_');
+      final fileName = '${safeId}_${DateTime.now().millisecondsSinceEpoch}';
       final extension = _getFileExtension(acquisitionLink.type);
-      final filePath = '${directory.path}/$fileName.$extension';
+      final filePath = '${directory.path}\\$fileName.$extension';
 
       // 解析 URL（处理相对路径）
       final downloadUrl = _resolveUrl(acquisitionLink.href);
@@ -710,175 +755,371 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Dialog(
-      child: SingleChildScrollView(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // 封面区域
             Stack(
               children: [
                 Container(
-                  height: 200,
+                  height: 240,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                       colors: [
                         Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(context)
+                            .colorScheme
+                            .primaryContainer
+                            .withOpacity(0.7),
                         Theme.of(context).colorScheme.surface,
                       ],
                     ),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(16)),
                   ),
-                  child: widget.book.coverUrl != null
-                      ? Image.network(
-                          widget.book.coverUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Icon(
-                                Icons.book,
-                                size: 64,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                  child: ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: () {
+                      final coverUrl = _resolveCoverUrl(widget.book.coverUrl);
+                      return coverUrl != null
+                          ? Image.network(
+                              coverUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.menu_book,
+                                        size: 80,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer
+                                            .withOpacity(0.5),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'No Cover Available',
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimaryContainer
+                                              .withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            )
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.menu_book,
+                                    size: 80,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'No Cover Available',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                          .withOpacity(0.7),
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
-                          },
-                        )
-                      : Center(
-                          child: Icon(
-                            Icons.book,
-                            size: 64,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                          ),
-                        ),
+                    }(),
+                  ),
                 ),
+                // 关闭按钮
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.close,
+                          color: Colors.white, size: 20),
+                      onPressed: () => Navigator.pop(context),
+                      padding: const EdgeInsets.all(8),
+                      constraints: const BoxConstraints(),
+                    ),
                   ),
                 ),
               ],
             ),
+            // 内容区域
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.book.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  if (widget.book.authors.isNotEmpty)
-                    Wrap(
-                      spacing: 8,
-                      children: widget.book.authors.map((author) {
-                        return Chip(
-                          avatar: const Icon(Icons.person, size: 18),
-                          label: Text(author.name),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                        );
-                      }).toList(),
-                    ),
-                  if (widget.book.summary != null) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.summary,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.book.summary!,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                  if (widget.book.publisher != null) ...[
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.business,
-                          size: 18,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.book.publisher!.name,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (widget.book.language != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.language,
-                          size: 18,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.book.language!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (widget.book.published != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 18,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _formatDate(widget.book.published!),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  if (_isDownloading) ...[
-                    LinearProgressIndicator(value: _downloadProgress),
-                    const SizedBox(height: 16),
-                  ],
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+              padding: const EdgeInsets.all(20),
+              child: SingleChildScrollView(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(l10n.cancel),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: _isDownloading ? null : _downloadAndImport,
-                        icon: _isDownloading
-                            ? SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  value: _downloadProgress,
+                      // 书名
+                      Text(
+                        widget.book.title,
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: -0.5,
                                 ),
-                              )
-                            : const Icon(Icons.download),
-                        label: Text(l10n.download),
                       ),
+                      const SizedBox(height: 12),
+                      // 作者
+                      if (widget.book.authors.isNotEmpty)
+                        Wrap(
+                          alignment: WrapAlignment.start,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: widget.book.authors.map((author) {
+                            return Chip(
+                              avatar: Icon(
+                                Icons.person,
+                                size: 18,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                              label: Text(
+                                author.name,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                            );
+                          }).toList(),
+                        ),
+                      // 摘要
+                      if (widget.book.summary != null &&
+                          widget.book.summary!.isNotEmpty) ...[
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.description,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.summary,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            widget.book.summary!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  height: 1.6,
+                                ),
+                            maxLines: 6,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                      // 出版信息
+                      if (widget.book.publisher != null ||
+                          widget.book.language != null ||
+                          widget.book.published != null) ...[
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (widget.book.publisher != null) ...[
+                                _buildInfoRow(
+                                  context,
+                                  Icons.business,
+                                  widget.book.publisher!.name,
+                                ),
+                              ],
+                              if (widget.book.language != null) ...[
+                                const SizedBox(height: 8),
+                                _buildInfoRow(
+                                  context,
+                                  Icons.language,
+                                  widget.book.language!,
+                                ),
+                              ],
+                              if (widget.book.published != null) ...[
+                                const SizedBox(height: 8),
+                                _buildInfoRow(
+                                  context,
+                                  Icons.calendar_today,
+                                  _formatDate(widget.book.published!),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                      // 下载进度
+                      if (_isDownloading) ...[
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      value: _downloadProgress > 0
+                                          ? _downloadProgress
+                                          : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Downloading...',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    '${(_downloadProgress * 100).toInt()}%',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: _downloadProgress > 0
+                                      ? _downloadProgress
+                                      : null,
+                                  minHeight: 6,
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.surface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
+                  ),
+                ),
+              ),
+            ),
+            // 底部按钮
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withOpacity(0.3),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(16)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed:
+                        _isDownloading ? null : () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton.icon(
+                    onPressed: _isDownloading ? null : _downloadAndImport,
+                    icon: _isDownloading
+                        ? SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              value: _downloadProgress > 0
+                                  ? _downloadProgress
+                                  : null,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          )
+                        : const Icon(Icons.download),
+                    label:
+                        Text(_isDownloading ? 'Downloading...' : l10n.download),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
                   ),
                 ],
               ),
@@ -886,6 +1127,26 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 

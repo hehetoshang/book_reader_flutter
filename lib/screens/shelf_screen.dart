@@ -71,11 +71,11 @@ class _ShelfScreenState extends State<ShelfScreen> {
             child: provider.books.isNotEmpty
                 ? GestureDetector(
                     onLongPress: () => _showImportOptions(context),
-                    child: FloatingActionButton.extended(
+                    child: FloatingActionButton(
                       key: const ValueKey('fab_visible'),
                       onPressed: _importBooks,
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.openFile),
+                      heroTag: 'import_books',
+                      child: const Icon(Icons.add),
                     ),
                   )
                 : const SizedBox.shrink(key: ValueKey('fab_hidden')),
@@ -116,9 +116,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
           return _buildEmptyState();
         }
 
-        return _isGridView
-            ? _buildGridView(books)
-            : _buildListView(books);
+        return _isGridView ? _buildGridView(books) : _buildListView(books);
       },
     );
   }
@@ -155,24 +153,24 @@ class _ShelfScreenState extends State<ShelfScreen> {
 
   Widget _buildGridView(List<Book> books) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // 设置卡片的最小宽度（以像素为单位）
     // 你可以调整这个值来改变卡片大小
     const double minCardWidth = 350; // 减小宽度以满足需求
-    
+
     // 根据最小卡片宽度计算列数
     int crossAxisCount = (screenWidth / minCardWidth).floor();
     // 确保至少有一列
     crossAxisCount = crossAxisCount.clamp(1, 6);
-    
+
     // 计算实际的卡片宽度（减去间距后）
     double totalSpacing = (crossAxisCount + 1) * 20.0; // 左右外边距 + 列间距
     double actualCardWidth = (screenWidth - totalSpacing) / crossAxisCount;
-    
+
     // 根据实际卡片宽度和期望的卡片高度计算宽高比
     // 期望的卡片高度（包括封面和信息区域）
     double expectedCardHeight = 125; // 减小高度以保持比例协调
-    
+
     double aspectRatio = actualCardWidth / expectedCardHeight;
 
     return GridView.builder(
@@ -244,19 +242,22 @@ class _ShelfScreenState extends State<ShelfScreen> {
       );
 
       final books = await _fileService.importFiles(files);
-      
+
       if (books.isNotEmpty && mounted) {
         await context.read<BookProvider>().addBooks(books);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Imported ${books.length} book(s) successfully')),
+            SnackBar(
+                content: Text('Imported ${books.length} book(s) successfully')),
           );
         }
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to import books: $e'), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('Failed to import books: $e'),
+            backgroundColor: Colors.red),
       );
     }
   }
@@ -366,7 +367,8 @@ class BookSearchDelegate extends SearchDelegate<String> {
         final book = books[index];
         return ListTile(
           leading: book.coverPath != null
-              ? Image.network(book.coverPath!, width: 40, height: 60, fit: BoxFit.cover)
+              ? Image.network(book.coverPath!,
+                  width: 40, height: 60, fit: BoxFit.cover)
               : const Icon(Icons.book, size: 40),
           title: Text(book.title),
           subtitle: Text(book.author),
