@@ -7,6 +7,7 @@ import '../services/services.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/import_options_dialog.dart';
 
 class ShelfScreen extends StatefulWidget {
   const ShelfScreen({super.key});
@@ -60,10 +61,26 @@ class _ShelfScreenState extends State<ShelfScreen> {
         ],
       ),
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _importBooks,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.openFile),
+      floatingActionButton: Consumer<BookProvider>(
+        builder: (context, provider, child) {
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return ScaleTransition(scale: animation, child: child);
+            },
+            child: provider.books.isNotEmpty
+                ? GestureDetector(
+                    onLongPress: () => _showImportOptions(context),
+                    child: FloatingActionButton.extended(
+                      key: const ValueKey('fab_visible'),
+                      onPressed: _importBooks,
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.openFile),
+                    ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('fab_hidden')),
+          );
+        },
       ),
     );
   }
@@ -126,16 +143,10 @@ class _ShelfScreenState extends State<ShelfScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.addYourFirstBook,
+            '点击右下角按钮导入书籍',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: _importBooks,
-            icon: const Icon(Icons.add),
-            label: Text(l10n.openFile),
           ),
         ],
       ),
@@ -203,6 +214,21 @@ class _ShelfScreenState extends State<ShelfScreen> {
     showSearch(
       context: context,
       delegate: BookSearchDelegate(),
+    );
+  }
+
+  void _showImportOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => ImportOptionsDialog(
+        onImportFromFile: () {
+          _importBooks();
+        },
+        onImportFromOpds: () {
+          AppRouter.goToOpds(context);
+        },
+      ),
     );
   }
 

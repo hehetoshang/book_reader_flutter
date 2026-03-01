@@ -9,6 +9,7 @@ class StorageService {
   Box<Book>? _booksBox;
   Box<ReadingProgress>? _progressBox;
   Box<AppSettings>? _settingsBox;
+  Box<OpdsCatalogConfig>? _opdsCatalogsBox;
 
   Future<void> initialize() async {
     await Hive.initFlutter();
@@ -28,11 +29,13 @@ class StorageService {
     Hive.registerAdapter(EpubThemeAdapter());
     Hive.registerAdapter(WindowSettingsAdapter());
     Hive.registerAdapter(ReadingModeAdapter());
+    Hive.registerAdapter(OpdsCatalogConfigAdapter());
 
     // Open boxes
     _booksBox = await Hive.openBox<Book>('books');
     _progressBox = await Hive.openBox<ReadingProgress>('reading_progress');
     _settingsBox = await Hive.openBox<AppSettings>('app_settings');
+    _opdsCatalogsBox = await Hive.openBox<OpdsCatalogConfig>('opds_catalogs');
   }
 
   // Books
@@ -109,6 +112,34 @@ class StorageService {
       pdfSettings: PdfReaderSettings(),
       epubSettings: EpubReaderSettings(),
     );
+  }
+
+  // OPDS Catalogs
+  Box<OpdsCatalogConfig> get opdsCatalogsBox {
+    if (_opdsCatalogsBox == null) {
+      throw StateError(
+          'StorageService not initialized. Call initialize() first.');
+    }
+    return _opdsCatalogsBox!;
+  }
+
+  List<OpdsCatalogConfig> getOpdsCatalogs() {
+    return opdsCatalogsBox.values.toList();
+  }
+
+  Future<void> saveOpdsCatalogs(List<OpdsCatalogConfig> catalogs) async {
+    await opdsCatalogsBox.clear();
+    for (final catalog in catalogs) {
+      await opdsCatalogsBox.put(catalog.id, catalog);
+    }
+  }
+
+  Future<void> addOpdsCatalog(OpdsCatalogConfig catalog) async {
+    await opdsCatalogsBox.put(catalog.id, catalog);
+  }
+
+  Future<void> deleteOpdsCatalog(String id) async {
+    await opdsCatalogsBox.delete(id);
   }
 
   // Backup & Restore
@@ -282,6 +313,7 @@ class StorageService {
     await _booksBox?.close();
     await _progressBox?.close();
     await _settingsBox?.close();
+    await _opdsCatalogsBox?.close();
   }
 }
 

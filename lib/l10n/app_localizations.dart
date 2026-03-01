@@ -544,6 +544,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @importBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Books'**
+  String get importBooks;
+
+  /// No description provided for @importFromFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from File'**
+  String get importFromFile;
+
+  /// No description provided for @importFromFileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select PDF or EPUB files from your device'**
+  String get importFromFileSubtitle;
+
+  /// No description provided for @importFromOpds.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from OPDS'**
+  String get importFromOpds;
+
+  /// No description provided for @importFromOpdsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse and download books from online OPDS catalogs'**
+  String get importFromOpdsSubtitle;
+
+  /// No description provided for @opdsCatalogs.
+  ///
+  /// In en, this message translates to:
+  /// **'OPDS Catalogs'**
+  String get opdsCatalogs;
+
+  /// No description provided for @addCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Catalog'**
+  String get addCatalog;
+
+  /// No description provided for @editCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Catalog'**
+  String get editCatalog;
+
+  /// No description provided for @deleteCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Catalog'**
+  String get deleteCatalog;
+
+  /// No description provided for @catalogUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog URL'**
+  String get catalogUrl;
+
+  /// No description provided for @catalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog Title'**
+  String get catalogTitle;
+
+  /// No description provided for @catalogDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog Description'**
+  String get catalogDescription;
+
+  /// No description provided for @catalogUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the OPDS catalog Atom feed URL'**
+  String get catalogUrlHint;
+
+  /// No description provided for @testConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Connection'**
+  String get testConnection;
+
+  /// No description provided for @connectionSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Successful'**
+  String get connectionSuccessful;
+
+  /// No description provided for @connectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Failed'**
+  String get connectionFailed;
+
+  /// No description provided for @downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading...'**
+  String get downloading;
+
+  /// No description provided for @downloadComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Complete'**
+  String get downloadComplete;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Failed'**
+  String get downloadFailed;
+
+  /// No description provided for @cancelDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Download'**
+  String get cancelDownload;
+
+  /// No description provided for @bookDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Details'**
+  String get bookDetails;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @publisher.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher'**
+  String get publisher;
+
+  /// No description provided for @published.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get published;
+
+  /// No description provided for @failedToLoadOpdsCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load OPDS catalog: {error}'**
+  String failedToLoadOpdsCatalog(Object error);
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noContent.
+  ///
+  /// In en, this message translates to:
+  /// **'No content'**
+  String get noContent;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @noBooksFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No books found'**
+  String get noBooksFound;
+
+  /// No description provided for @bookDownloadedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Book downloaded successfully'**
+  String get bookDownloadedSuccessfully;
+
+  /// No description provided for @failedToDownloadBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to download book: {error}'**
+  String failedToDownloadBook(Object error);
+
+  /// No description provided for @summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// No description provided for @noOpdsCatalogs.
+  ///
+  /// In en, this message translates to:
+  /// **'No OPDS catalogs'**
+  String get noOpdsCatalogs;
+
+  /// No description provided for @noOpdsCatalogsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an OPDS catalog to browse and download books online'**
+  String get noOpdsCatalogsDescription;
+
+  /// No description provided for @addOpdsCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add OPDS Catalog'**
+  String get addOpdsCatalog;
+
+  /// No description provided for @deleteOpdsCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Catalog'**
+  String get deleteOpdsCatalog;
+
+  /// No description provided for @deleteOpdsCatalogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete "{title}"?'**
+  String deleteOpdsCatalogConfirm(String title);
+
+  /// No description provided for @opdsCatalogDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'OPDS catalog deleted'**
+  String get opdsCatalogDeleted;
+
+  /// No description provided for @library.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get library;
+
+  /// No description provided for @disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @disable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get disable;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
+  /// No description provided for @opdsCatalogUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'OPDS catalog updated'**
+  String get opdsCatalogUpdated;
+
+  /// No description provided for @opdsCatalogAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'OPDS catalog added'**
+  String get opdsCatalogAdded;
+
+  /// No description provided for @editOpdsCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit OPDS Catalog'**
+  String get editOpdsCatalog;
+
+  /// No description provided for @opdsUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'OPDS URL'**
+  String get opdsUrl;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @invalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL'**
+  String get invalidUrl;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @browseAndDownloadOnlineBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse and download online books'**
+  String get browseAndDownloadOnlineBooks;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

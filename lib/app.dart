@@ -167,6 +167,7 @@ class UniversalReaderAppWrapper extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BookProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => ReadingProvider()),
+        ChangeNotifierProvider(create: (_) => OpdsProvider()),
       ],
       child: const UniversalReaderApp(),
     );

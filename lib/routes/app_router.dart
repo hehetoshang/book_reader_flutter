@@ -53,6 +53,24 @@ class AppRouter {
         name: 'about',
         builder: (context, state) => const AboutScreen(),
       ),
+
+      // OPDS Catalogs Route
+      GoRoute(
+        path: '/opds',
+        name: 'opds',
+        builder: (context, state) => const OpdsScreen(),
+      ),
+
+      // OPDS Browse Route
+      GoRoute(
+        path: '/opds/browse',
+        name: 'opds_browse',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final catalog = extra?['catalog'] as OpdsCatalogConfig;
+          return OpdsBrowseScreen(catalog: catalog);
+        },
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -117,6 +135,10 @@ class AppRouter {
     context.push('/about');
   }
 
+  static void goToOpds(BuildContext context) {
+    context.push('/opds');
+  }
+
   static void goBack(BuildContext context) {
     context.pop();
   }
@@ -129,6 +151,8 @@ class RouteNames {
   static const String epubReader = 'epub_reader';
   static const String settings = 'settings';
   static const String about = 'about';
+  static const String opds = 'opds';
+  static const String opdsBrowse = 'opds_browse';
 }
 
 // Route paths for reference
@@ -138,4 +162,6 @@ class RoutePaths {
   static const String epubReader = '/epub/:bookId';
   static const String settings = '/settings';
   static const String about = '/about';
+  static const String opds = '/opds';
+  static const String opdsBrowse = '/opds/browse';
 }

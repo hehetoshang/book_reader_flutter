@@ -56,6 +56,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
+          // OPDS Catalogs
+          ListTile(
+            leading: const Icon(Icons.cloud),
+            title: Text(l10n.opdsCatalogs),
+            subtitle: Text(l10n.browseAndDownloadOnlineBooks),
+            onTap: () => AppRouter.goToOpds(context),
+          ),
+
+          const Divider(),
+
           // Data Management Section
           _buildSectionHeader(context, l10n.dataManagement),
           ListTile(
