@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:math';
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:xml/xml.dart';
 import '../models/models.dart';
@@ -100,7 +100,7 @@ class FileService {
         totalPages: metadata['totalPages'] as int?,
       );
     } catch (e) {
-      print('Error importing file: $e');
+      debugPrint('Error importing file: $e');
       return null;
     }
   }
@@ -131,7 +131,7 @@ class FileService {
         metadata.addAll(await _extractEpubMetadata(filePath));
       }
     } catch (e) {
-      print('Error extracting metadata: $e');
+      debugPrint('Error extracting metadata: $e');
     }
 
     return metadata;
@@ -168,7 +168,7 @@ class FileService {
         }
       }
     } catch (e) {
-      print('Error extracting PDF metadata: $e');
+      debugPrint('Error extracting PDF metadata: $e');
     }
 
     return metadata;
@@ -262,10 +262,10 @@ class FileService {
         metadata['totalPages'] = itemrefs.length;
       }
 
-      print('📚 EPUB Metadata extracted: $metadata');
+      debugPrint('📚 EPUB Metadata extracted: $metadata');
     } catch (e, stack) {
-      print('Error extracting EPUB metadata: $e');
-      print('Stack trace: $stack');
+      debugPrint('Error extracting EPUB metadata: $e');
+      debugPrint('Stack trace: $stack');
     }
 
     return metadata;
@@ -369,11 +369,11 @@ class FileService {
       final outputFile = File(outputPath);
       await outputFile.writeAsBytes(coverBytes);
 
-      print('📚 EPUB cover extracted: $outputPath');
+      debugPrint('📚 EPUB cover extracted: $outputPath');
       return outputPath;
     } catch (e, stack) {
-      print('Error extracting EPUB cover: $e');
-      print('Stack trace: $stack');
+      debugPrint('Error extracting EPUB cover: $e');
+      debugPrint('Stack trace: $stack');
       return null;
     }
   }
@@ -400,7 +400,7 @@ class FileService {
 
       return null;
     } catch (e) {
-      print('Error generating cover: $e');
+      debugPrint('Error generating cover: $e');
       return null;
     }
   }
@@ -454,7 +454,7 @@ class FileService {
         await file.delete();
       }
     } catch (e) {
-      print('Error deleting file: $e');
+      debugPrint('Error deleting file: $e');
     }
   }
 
@@ -467,7 +467,7 @@ class FileService {
         return await file.length();
       }
     } catch (e) {
-      print('Error getting file size: $e');
+      debugPrint('Error getting file size: $e');
     }
     return null;
   }

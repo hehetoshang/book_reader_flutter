@@ -82,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.delete_forever, color: Colors.red),
             title: Text(
               l10n.clearAllData,
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
             onTap: () => _clearAllData(context),
           ),
@@ -194,13 +194,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: 'system',
                 child: Text(l10n.languageSystem),
               ),
-              DropdownMenuItem(
+              const DropdownMenuItem(
                 value: 'zh',
-                child: const Text('中文'),
+                child: Text('中文'),
               ),
-              DropdownMenuItem(
+              const DropdownMenuItem(
                 value: 'en',
-                child: const Text('English'),
+                child: Text('English'),
               ),
             ],
             onChanged: (value) {
@@ -229,26 +229,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _exportData(BuildContext context) async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     try {
-      // TODO: Implement data export
-      context.showSnackBar(l10n.dataExportComingSoon);
+      if (mounted) context.showSnackBar(l10n.dataExportComingSoon);
     } catch (e) {
-      context.showErrorSnackBar(l10n.failedToExportData(e.toString()));
+      if (mounted) context.showErrorSnackBar(l10n.failedToExportData(e.toString()));
     }
   }
 
   Future<void> _importData(BuildContext context) async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     try {
-      // TODO: Implement data import
-      context.showSnackBar(l10n.dataImportComingSoon);
+      if (mounted) context.showSnackBar(l10n.dataImportComingSoon);
     } catch (e) {
-      context.showErrorSnackBar(l10n.failedToImportData(e.toString()));
+      if (mounted) context.showErrorSnackBar(l10n.failedToImportData(e.toString()));
     }
   }
 
   Future<void> _clearAllData(BuildContext context) async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await context.showConfirmDialog(
       title: l10n.clearAllData,
@@ -256,13 +257,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
       isDangerous: true,
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
       try {
         await context.read<BookProvider>().deleteAllBooks();
-        context.showSnackBar(l10n.allDataCleared);
+        if (mounted) showSnackBar(SnackBar(content: Text(l10n.allDataCleared)));
       } catch (e) {
-        context.showErrorSnackBar(l10n.failedToClearData(e.toString()));
+        if (mounted) showErrorSnackBar(l10n.failedToClearData(e.toString()));
       }
+    }
+  }
+
+  void showSnackBar(SnackBar snackBar) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
+
+  void showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
     }
   }
 }

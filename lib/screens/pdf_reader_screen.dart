@@ -29,7 +29,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   int _currentPage = 1;
   int _totalPages = 1;
   bool _hasAttemptedJump = false;
-  bool _hasAttemptedRestoreZoom = false;
+
   double? _savedZoom;
 
   @override
@@ -89,10 +89,10 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       );
     }
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
         context.read<ReadingProvider>().endReading();
-        return true;
       },
       child: Scaffold(
         key: _scaffoldKey,
@@ -134,10 +134,11 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
           ],
         ),
         drawer: _buildTocDrawer(),
-        body: RawKeyboardListener(
+        body: KeyboardListener(
           focusNode: _focusNode,
-          onKey: (RawKeyEvent event) {
-            if (event is RawKeyDownEvent) {
+          autofocus: true,
+          onKeyEvent: (KeyEvent event) {
+            if (event is KeyDownEvent) {
               if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
                 if (_currentPage > 1) {
                   _controller.goToPage(pageNumber: _currentPage - 1);
@@ -151,7 +152,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
           },
           child: GestureDetector(
             onTap: () {
-              FocusScope.of(context).requestFocus(_focusNode);
+              _focusNode.requestFocus();
             },
             child: ClipRect(
               child: Column(

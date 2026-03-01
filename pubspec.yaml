@@ -5,6 +5,7 @@ repository: https://github.com/hehetoshang/book_reader_flutter
 issue_tracker: https://github.com/hehetoshang/book_reader_flutter/issues
 
 version: 0.0.2
+publish_to: none
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -83,11 +84,13 @@ flutter_icons:
     image_path: "lib/assets/icons/app_icon.png"
   windows:
     generate: true
-    image_path: "lib/assets/icons/app_icon.png"
     icon_size: 256 # min:48, max:256, default: 48
+    image_path: "lib/assets/icons/app_icon_windows.png"
   macos:
     generate: true
-    image_path: "lib/assets/icons/app_icon.png"
+  linux:
+    generate: true
+    image_path: "lib/assets/icons/app_icon_linux.png"
 
 flutter:
   uses-material-design: true
