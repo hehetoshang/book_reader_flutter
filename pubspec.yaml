@@ -5,6 +5,7 @@ repository: https://github.com/hehetoshang/book_reader_flutter
 issue_tracker: https://github.com/hehetoshang/book_reader_flutter/issues
 
 version: 0.0.2
+publish_to: none
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

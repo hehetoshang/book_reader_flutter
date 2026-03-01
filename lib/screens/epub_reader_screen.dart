@@ -132,7 +132,9 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
       }
 
       // Initialize reading session
-      await context.read<ReadingProvider>().startReading(book);
+      if (mounted) {
+        await context.read<ReadingProvider>().startReading(book);
+      }
 
       // Jump to saved progress position
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -236,11 +238,11 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     final readerLocale = Locale(languageCode);
 
     return Scaffold(
-      body: WillPopScope(
-        onWillPop: () async {
+      body: PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {
           // 处理系统返回按钮事件
           context.read<ReadingProvider>().endReading();
-          return true;
         },
         child: KatbookEpubReader(
           key: _readerKey,

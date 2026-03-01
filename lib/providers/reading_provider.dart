@@ -46,13 +46,11 @@ class ReadingProvider extends ChangeNotifier {
 
       // Load existing progress or create new
       _currentProgress = _storageService.getReadingProgress(book.id);
-      if (_currentProgress == null) {
-        _currentProgress = ReadingProgress(
-          bookId: book.id,
-          fileType: book.fileType,
-          updatedAt: DateTime.now(),
-        );
-      }
+      _currentProgress ??= ReadingProgress(
+        bookId: book.id,
+        fileType: book.fileType,
+        updatedAt: DateTime.now(),
+      );
 
       // Initialize state from progress
       if (book.fileType == BookFileType.pdf) {

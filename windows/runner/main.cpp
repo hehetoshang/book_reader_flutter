@@ -5,7 +5,7 @@
 #include "flutter_window.h"
 #include "utils.h"
 
-// 定义应用程序的唯一标识符
+// Define unique identifier for the application
 #define APP_UNIQUE_ID L"book_reader_flutter_unique_mutex"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
@@ -20,24 +20,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
-  // 创建互斥量检测单实例
+  // Create mutex to detect single instance
   HANDLE mutex = ::CreateMutexW(nullptr, TRUE, APP_UNIQUE_ID);
   if (mutex == nullptr) {
     return EXIT_FAILURE;
   }
 
-  // 如果互斥量已存在，说明程序已在运行
+  // If mutex already exists, the program is already running
   if (::GetLastError() == ERROR_ALREADY_EXISTS) {
-    // 程序已运行，找到已存在的窗口并聚焦
+    // Program is running, find the existing window and focus it
     HWND hwnd = ::FindWindowW(nullptr, L"book_reader_flutter");
     if (hwnd != nullptr) {
-      // 如果窗口最小化，恢复它
+      // Restore window if minimized
       if (::IsIconic(hwnd)) {
         ::ShowWindow(hwnd, SW_RESTORE);
       }
-      // 将窗口置于前台并聚焦
+      // Bring window to front and focus
       ::SetForegroundWindow(hwnd);
-      // 如果窗口不在前台，使用 AttachThreadInput 强制聚焦
+      // Force focus if not in foreground
       ::BringWindowToTop(hwnd);
     }
     ::CloseHandle(mutex);
