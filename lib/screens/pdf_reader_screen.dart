@@ -205,8 +205,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
                           ),
                         ),
                       ),
-                      // Bottom toolbar
-                      _buildBottomToolbar(),
                     ],
                   ),
                 ),
@@ -335,6 +333,13 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
                   ),
                 ),
               ),
+            // 底部工具栏（固定在底部，最上层 - 放在最后确保在最上面）
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildBottomToolbar(),
+            ),
           ],
         ),
       ),
@@ -344,7 +349,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   Widget _buildBottomToolbar() {
     final effectiveTotalPages = _totalPages > 0 ? _totalPages : 1;
     final effectiveCurrentPage = _currentPage.clamp(1, effectiveTotalPages);
-    final hasSearchResults = _searcher != null && _searcher!.matches.isNotEmpty;
+    // 只有在搜索面板打开且有搜索结果时才显示搜索导航按钮
+    final hasSearchResults =
+        _showSearchPanel && _searcher != null && _searcher!.matches.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -364,7 +371,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
               ? MainAxisAlignment.spaceBetween
               : MainAxisAlignment.spaceEvenly,
           children: [
-            // 搜索导航按钮（如果有搜索结果）
+            // 搜索导航按钮（只有在搜索面板打开时才显示）
             if (hasSearchResults) ...[
               IconButton(
                 icon: const Icon(Icons.keyboard_arrow_up),
