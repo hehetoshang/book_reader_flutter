@@ -9,6 +9,7 @@ import '../providers/opds_provider.dart';
 import '../providers/book_provider.dart';
 import '../services/file_service.dart';
 import '../services/opds_service.dart';
+import '../widgets/opds_auth_dialog.dart';
 
 class OpdsBrowseScreen extends StatefulWidget {
   final OpdsCatalogConfig catalog;
@@ -28,10 +29,20 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
   String? _error;
   String _currentUrl = '';
   final ScrollController _scrollController = ScrollController();
+  bool _disposed = false;
+  // 保存最新的认证信息，用于继承到子目录
+  String? _currentUsername;
+  String? _currentPassword;
+  Map<String, String>? _currentCookies;
 
   @override
   void initState() {
     super.initState();
+    // 初始化当前认证信息
+    _currentUsername = widget.catalog.username;
+    _currentPassword = widget.catalog.password;
+    _currentCookies = widget.catalog.cookies;
+
     _currentUrl = widget.catalog.url;
     _loadCatalog(widget.catalog.url);
     _scrollController.addListener(_onScroll);
@@ -39,6 +50,7 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
 
   @override
   void dispose() {
+    _disposed = true;
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -54,6 +66,8 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
   }
 
   Future<void> _loadCatalog(String url) async {
+    if (!mounted || _disposed) return;
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -61,33 +75,160 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
 
     try {
       final provider = context.read<OpdsProvider>();
-      
+
       // 设置 cookies
-      if (widget.catalog.cookies != null && widget.catalog.cookies!.isNotEmpty) {
+      if (widget.catalog.cookies != null &&
+          widget.catalog.cookies!.isNotEmpty) {
         provider.setCookies(widget.catalog.cookies);
       }
-      
+
       final catalog = await provider.fetchCatalog(
         url,
         username: widget.catalog.username,
         password: widget.catalog.password,
         cookies: widget.catalog.cookies,
       );
+
+      if (!mounted || _disposed) return;
       setState(() {
         _catalog = catalog;
         _currentUrl = url;
+        // 更新当前认证信息
+        _currentUsername = widget.catalog.username;
+        _currentPassword = widget.catalog.password;
+        _currentCookies = widget.catalog.cookies;
       });
 
       final config = widget.catalog.copyWith(lastAccessed: DateTime.now());
       await provider.updateCatalog(config);
+    } on OpdsHttpException catch (e) {
+      // 处理 401 认证错误
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        final credentials = await _showAuthDialog();
+        if (credentials != null && mounted && !_disposed) {
+          final username = credentials['username'];
+          final password = credentials['password'];
+          final savePassword = credentials['savePassword'] == true;
+
+          // 更新当前认证信息（用于子目录继承）
+          setState(() {
+            _currentUsername = username;
+            _currentPassword = password;
+          });
+
+          // 用户名始终保存，只有密码可以选择性保存
+          final updatedCatalog = OpdsCatalogConfig(
+            id: widget.catalog.id,
+            title: widget.catalog.title,
+            url: widget.catalog.url,
+            description: widget.catalog.description,
+            isEnabled: widget.catalog.isEnabled,
+            lastAccessed: DateTime.now(),
+            username: username, // 始终保存用户名
+            password: savePassword ? password : null, // 只有勾选时才保存密码
+            cookies: widget.catalog.cookies,
+          );
+          // 使用新配置重新加载（会使用 config 中的 username/password）
+          await _loadCatalogWithConfig(updatedCatalog, url);
+        } else if (mounted && !_disposed) {
+          setState(() {
+            _error = e.toString();
+          });
+        }
+      } else if (mounted && !_disposed) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      if (mounted && !_disposed) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
     } finally {
+      if (mounted && !_disposed) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<Map<String, dynamic>?> _showAuthDialog() async {
+    if (!mounted) return null;
+
+    // 保存必要的数据，避免在异步操作中访问已销毁的 widget
+    final username = widget.catalog.username;
+    final password = widget.catalog.password;
+
+    try {
+      return showDialog<Map<String, dynamic>>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => OpdsAuthDialog(
+          username: username,
+          password: password,
+        ),
+      );
+    } catch (e) {
+      // Dialog 可能因为页面已销毁而无法显示
+      return null;
+    }
+  }
+
+  Future<void> _loadCatalogWithConfig(
+      OpdsCatalogConfig config, String url) async {
+    if (!mounted || _disposed) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final provider = context.read<OpdsProvider>();
+
+      if (config.cookies != null && config.cookies!.isNotEmpty) {
+        provider.setCookies(config.cookies);
+      }
+
+      // 优先使用状态变量中的认证信息（支持临时不保存密码的情况）
+      final username = _currentUsername ?? config.username;
+      final password = _currentPassword ?? config.password;
+
+      final catalog = await provider.fetchCatalog(
+        url,
+        username: username,
+        password: password,
+        cookies: config.cookies,
+      );
+
+      if (!mounted || _disposed) return;
       setState(() {
-        _isLoading = false;
+        _catalog = catalog;
+        _currentUrl = url;
+        // 更新当前认证信息，确保子目录继承正确的凭据
+        _currentUsername = username;
+        _currentPassword = password;
+        _currentCookies = config.cookies;
       });
+
+      // 更新 provider 中的配置
+      await provider
+          .updateCatalog(config.copyWith(lastAccessed: DateTime.now()));
+    } catch (e) {
+      if (mounted && !_disposed) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
+    } finally {
+      if (mounted && !_disposed) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -449,13 +590,16 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
     );
     if (link.href.isNotEmpty) {
       final resolvedUrl = _resolveUrl(link.href);
-      // 创建新的 catalog 配置，使用新的 URL 和临时 ID
+      // 创建新的 catalog 配置，继承最新的认证信息和 cookies
       final newCatalog = OpdsCatalogConfig(
         id: '${widget.catalog.id}#${Uri.encodeComponent(resolvedUrl)}', // 使用唯一 ID
         title: entry.title, // 使用分类标题
         url: resolvedUrl,
         description: widget.catalog.description,
         isEnabled: widget.catalog.isEnabled,
+        username: _currentUsername, // 使用最新的用户名
+        password: _currentPassword, // 使用最新的密码
+        cookies: _currentCookies, // 使用最新的 cookies
       );
       // 使用 push 导航到新页面，实现页面过渡动画
       context.push(
@@ -539,7 +683,7 @@ class _NavigationItem extends StatelessWidget {
   }
 }
 
-class _BookListItem extends StatelessWidget {
+class _BookListItem extends StatefulWidget {
   final OpdsEntry entry;
   final String? coverUrl;
   final VoidCallback onTap;
@@ -551,11 +695,18 @@ class _BookListItem extends StatelessWidget {
   });
 
   @override
+  State<_BookListItem> createState() => _BookListItemState();
+}
+
+class _BookListItemState extends State<_BookListItem> {
+  bool _imageLoaded = false;
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Row(
@@ -566,18 +717,48 @@ class _BookListItem extends StatelessWidget {
                 width: 60,
                 height: 80,
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: coverUrl != null
-                    ? Image.network(
-                        coverUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Center(
+                child: widget.coverUrl != null
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 始终显示占位图作为背景
+                          const Center(
                             child: Icon(
                               Icons.book,
                               size: 24,
                             ),
-                          );
-                        },
+                          ),
+                          // 加载图片
+                          Positioned.fill(
+                            child: Image.network(
+                              widget.coverUrl!,
+                              fit: BoxFit.cover,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null && !_imageLoaded) {
+                                  // 使用 addPostFrameCallback 避免在 build 过程中调用 setState
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    if (mounted) {
+                                      setState(() {
+                                        _imageLoaded = true;
+                                      });
+                                    }
+                                  });
+                                }
+                                // 加载完成前显示透明，让底层占位图显示
+                                if (loadingProgress != null) {
+                                  return const SizedBox.shrink();
+                                }
+                                return child;
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                // 加载失败也显示透明，保持占位图
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ),
+                        ],
                       )
                     : const Center(
                         child: Icon(
@@ -593,7 +774,7 @@ class _BookListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      entry.title,
+                      widget.entry.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -601,9 +782,9 @@ class _BookListItem extends StatelessWidget {
                           ),
                     ),
                     const SizedBox(height: 4),
-                    if (entry.primaryAuthor != null)
+                    if (widget.entry.primaryAuthor != null)
                       Text(
-                        entry.primaryAuthor!,
+                        widget.entry.primaryAuthor!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -612,10 +793,11 @@ class _BookListItem extends StatelessWidget {
                                   .onSurfaceVariant,
                             ),
                       ),
-                    if (entry.summary != null && entry.summary!.isNotEmpty) ...[
+                    if (widget.entry.summary != null &&
+                        widget.entry.summary!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
-                        entry.summary!,
+                        widget.entry.summary!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall,
@@ -709,12 +891,13 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
       final downloadUrl = _resolveUrl(acquisitionLink.href);
 
       final opdsService = OpdsService();
-      
+
       // 设置 cookies
-      if (widget.catalog.cookies != null && widget.catalog.cookies!.isNotEmpty) {
+      if (widget.catalog.cookies != null &&
+          widget.catalog.cookies!.isNotEmpty) {
         opdsService.setCookies(widget.catalog.cookies);
       }
-      
+
       await opdsService.downloadFile(
         downloadUrl,
         filePath,

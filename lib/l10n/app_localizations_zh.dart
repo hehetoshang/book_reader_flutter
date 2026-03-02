@@ -63,6 +63,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cacheCleared => '缓存清除成功';
 
   @override
+  String get clearCookies => '清除 Cookies';
+
+  @override
   String get confirm => '确认';
 
   @override
@@ -101,7 +104,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get developer => '开发者';
 
   @override
-  String get description => '一款支持PDF和EPUB格式的跨平台阅读器';
+  String get description => '描述';
 
   @override
   String get back => '返回';
@@ -242,46 +245,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String get close => '关闭';
 
   @override
-  String get importBooks => '导入书籍';
-
-  @override
-  String get importFromFile => '从文件导入';
-
-  @override
-  String get importFromFileSubtitle => '从本地设备选择 PDF 或 EPUB 文件';
-
-  @override
-  String get importFromOpds => '从 OPDS 导入';
-
-  @override
-  String get importFromOpdsSubtitle => '从在线 OPDS 目录浏览和下载书籍';
-
-  @override
   String get opdsCatalogs => 'OPDS 目录';
 
   @override
-  String get addCatalog => '添加目录';
+  String get noOpdsCatalogs => '暂无 OPDS 目录';
 
   @override
-  String get editCatalog => '编辑目录';
+  String get noOpdsCatalogsDescription => '添加 OPDS 目录以浏览和下载在线书籍';
 
   @override
-  String get deleteCatalog => '删除目录';
+  String get addOpdsCatalog => '添加 OPDS 目录';
 
   @override
-  String get catalogUrl => '目录 URL';
+  String get editOpdsCatalog => '编辑 OPDS 目录';
 
   @override
-  String get catalogTitle => '目录标题';
+  String get deleteOpdsCatalog => '删除 OPDS 目录';
 
   @override
-  String get catalogDescription => '目录描述';
+  String deleteOpdsCatalogConfirm(Object title) {
+    return '确定要删除目录\"$title\"吗？';
+  }
 
   @override
-  String get catalogDescriptionHint => '可选：描述这个 OPDS 目录';
+  String get opdsCatalogAdded => 'OPDS 目录已添加';
 
   @override
-  String get catalogUrlHint => '输入 OPDS 目录的 Atom feed URL';
+  String get opdsCatalogUpdated => 'OPDS 目录已更新';
+
+  @override
+  String get opdsCatalogDeleted => 'OPDS 目录已删除';
+
+  @override
+  String get opdsUrl => 'OPDS 目录 URL';
 
   @override
   String get testConnection => '测试连接';
@@ -290,115 +286,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connectionSuccessful => '连接成功';
 
   @override
-  String get connectionFailed => '连接失败';
-
-  @override
-  String get downloading => '下载中...';
-
-  @override
-  String get downloadComplete => '下载完成';
-
-  @override
-  String get downloadFailed => '下载失败';
-
-  @override
-  String get cancelDownload => '取消下载';
-
-  @override
-  String get bookDetails => '书籍详情';
-
-  @override
-  String get download => '下载';
-
-  @override
-  String get publisher => '出版商';
-
-  @override
-  String get published => '出版日期';
-
-  @override
-  String failedToLoadOpdsCatalog(Object error) => '加载 OPDS 目录失败：$error';
-
-  @override
-  String get retry => '重试';
-
-  @override
-  String get noContent => '无内容';
-
-  @override
-  String get filters => '筛选';
+  String get failedToLoadOpdsCatalog => '加载 OPDS 目录失败';
 
   @override
   String get noBooksFound => '未找到书籍';
 
   @override
+  String get filters => '筛选';
+
+  @override
+  String get download => '下载';
+
+  @override
   String get bookDownloadedSuccessfully => '书籍下载成功';
 
   @override
-  String failedToDownloadBook(Object error) => '下载书籍失败：$error';
+  String failedToDownloadBook(Object error) {
+    return '下载书籍失败：$error';
+  }
 
   @override
-  String get summary => '摘要';
-
-  @override
-  String get noOpdsCatalogs => '无 OPDS 目录';
-
-  @override
-  String get noOpdsCatalogsDescription => '添加 OPDS 目录以在线浏览和下载书籍';
-
-  @override
-  String get addOpdsCatalog => '添加 OPDS 目录';
-
-  @override
-  String get deleteOpdsCatalog => '删除目录';
-
-  @override
-  String deleteOpdsCatalogConfirm(String title) => '确定要删除"$title"吗？';
-
-  @override
-  String get opdsCatalogDeleted => 'OPDS 目录已删除';
-
-  @override
-  String get library => '图书馆';
+  String get summary => '简介';
 
   @override
   String get disabled => '已禁用';
 
   @override
-  String get edit => '编辑';
+  String get enable => '启用';
 
   @override
   String get disable => '禁用';
 
   @override
-  String get enable => '启用';
-
-  @override
-  String get opdsCatalogUpdated => 'OPDS 目录已更新';
-
-  @override
-  String get opdsCatalogAdded => 'OPDS 目录已添加';
-
-  @override
-  String get editOpdsCatalog => '编辑 OPDS 目录';
-
-  @override
-  String get opdsUrl => 'OPDS URL';
-
-  @override
-  String get fieldRequired => '此字段为必填项';
-
-  @override
-  String get invalidUrl => '无效的 URL';
-
-  @override
-  String get title => '标题';
-
-  @override
-  String get username => '用户名';
-
-  @override
-  String get password => '密码';
+  String get edit => '编辑';
 
   @override
   String get add => '添加';
@@ -407,35 +327,96 @@ class AppLocalizationsZh extends AppLocalizations {
   String get save => '保存';
 
   @override
+  String get fieldRequired => '此字段为必填项';
+
+  @override
+  String get invalidUrl => 'URL 格式无效';
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get noContent => '无内容';
+
+  @override
+  String get username => '用户名';
+
+  @override
+  String get password => '密码';
+
+  @override
   String get browseAndDownloadOnlineBooks => '浏览和下载在线书籍';
 
   @override
-  String get errorPageNotFound => '页面未找到 (404)';
+  String get authenticationRequired => '需要身份验证';
 
   @override
-  String get errorPageNotFoundSuggestion => '请求的目录页面不存在，请检查 URL 是否正确';
+  String get authenticationRequiredMessage => '此 OPDS 目录需要身份验证。请输入您的凭据。';
 
   @override
-  String errorServer(String statusCode) => '服务器错误 ($statusCode)';
+  String get errorPageNotFound => '页面未找到';
 
   @override
-  String get errorServerSuggestion => '服务器遇到内部错误，请稍后重试';
+  String get errorPageNotFoundSuggestion => '无法找到请求的页面。请检查 URL。';
 
   @override
-  String errorAuthFailed(String statusCode) => '认证失败 ($statusCode)';
+  String errorServer(Object statusCode) {
+    return '服务器错误 ($statusCode)';
+  }
 
   @override
-  String get errorAuthFailedSuggestion => '需要身份验证，请在设置中检查您的凭据';
+  String get errorServerSuggestion => '服务器遇到内部错误，请稍后重试。';
+
+  @override
+  String errorAuthFailed(Object statusCode) {
+    return '认证失败 ($statusCode)';
+  }
+
+  @override
+  String get errorAuthFailedSuggestion => '需要身份验证，请在设置中检查您的凭据。';
 
   @override
   String get errorNetwork => '网络连接失败';
 
   @override
-  String get errorNetworkSuggestion => '请检查您的网络连接后重试';
+  String get errorNetworkSuggestion => '请检查您的网络连接后重试。';
 
   @override
   String get errorLoadFailed => '加载失败';
 
   @override
-  String get errorLoadFailedSuggestion => '发生未知错误，您可以尝试重试';
+  String get errorLoadFailedSuggestion => '发生未知错误，您可以尝试重试。';
+
+  @override
+  String get importBooks => '导入书籍';
+
+  @override
+  String get importFromFile => '从文件导入';
+
+  @override
+  String get importFromFileSubtitle => '从设备中选择文件';
+
+  @override
+  String get importFromOpds => '从 OPDS 导入';
+
+  @override
+  String get importFromOpdsSubtitle => '浏览在线书籍目录';
+
+  @override
+  String get title => '标题';
+
+  @override
+  String get catalogDescription => '描述';
+
+  @override
+  String get catalogDescriptionHint => '可选描述';
+
+  @override
+  String get connectionFailed => '连接失败';
+
+  @override
+  String get savePassword => '保存密码';
+
+  @override
+  String get savePasswordSubtitle => '保存凭据以便下次访问';
 }

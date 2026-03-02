@@ -126,11 +126,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
               icon: const Icon(Icons.menu_book),
               onPressed: _showTableOfContents,
             ),
-            // Settings button
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: _showSettings,
-            ),
           ],
         ),
         drawer: _buildTocDrawer(),

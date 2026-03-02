@@ -63,6 +63,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cacheCleared => 'Cache cleared successfully';
 
   @override
+  String get clearCookies => 'Clear Cookies';
+
+  @override
   String get confirm => 'Confirm';
 
   @override
@@ -101,7 +104,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developer => 'Developer';
 
   @override
-  String get description => 'A cross-platform reader that supports PDF and EPUB formats';
+  String get description => 'Description';
 
   @override
   String get back => 'Back';
@@ -242,163 +245,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String get importBooks => 'Import Books';
-
-  @override
-  String get importFromFile => 'Import from File';
-
-  @override
-  String get importFromFileSubtitle => 'Select PDF or EPUB files from your device';
-
-  @override
-  String get importFromOpds => 'Import from OPDS';
-
-  @override
-  String get importFromOpdsSubtitle => 'Browse and download books from online OPDS catalogs';
-
-  @override
   String get opdsCatalogs => 'OPDS Catalogs';
 
   @override
-  String get addCatalog => 'Add Catalog';
+  String get noOpdsCatalogs => 'No OPDS Catalogs';
 
   @override
-  String get editCatalog => 'Edit Catalog';
-
-  @override
-  String get deleteCatalog => 'Delete Catalog';
-
-  @override
-  String get catalogUrl => 'Catalog URL';
-
-  @override
-  String get catalogTitle => 'Catalog Title';
-
-  @override
-  String get catalogDescription => 'Catalog Description';
-
-  @override
-  String get catalogDescriptionHint => 'Optional: Describe this OPDS catalog';
-
-  @override
-  String get catalogUrlHint => 'Enter OPDS catalog Atom feed URL';
-
-  @override
-  String get testConnection => 'Test Connection';
-
-  @override
-  String get connectionSuccessful => 'Connection Successful';
-
-  @override
-  String get connectionFailed => 'Connection Failed';
-
-  @override
-  String get downloading => 'Downloading...';
-
-  @override
-  String get downloadComplete => 'Download Complete';
-
-  @override
-  String get downloadFailed => 'Download Failed';
-
-  @override
-  String get cancelDownload => 'Cancel Download';
-
-  @override
-  String get bookDetails => 'Book Details';
-
-  @override
-  String get download => 'Download';
-
-  @override
-  String get publisher => 'Publisher';
-
-  @override
-  String get published => 'Published';
-
-  @override
-  String failedToLoadOpdsCatalog(Object error) => 'Failed to load OPDS catalog: $error';
-
-  @override
-  String get retry => 'Retry';
-
-  @override
-  String get noContent => 'No content';
-
-  @override
-  String get filters => 'Filters';
-
-  @override
-  String get noBooksFound => 'No books found';
-
-  @override
-  String get bookDownloadedSuccessfully => 'Book downloaded successfully';
-
-  @override
-  String failedToDownloadBook(Object error) => 'Failed to download book: $error';
-
-  @override
-  String get summary => 'Summary';
-
-  @override
-  String get noOpdsCatalogs => 'No OPDS catalogs';
-
-  @override
-  String get noOpdsCatalogsDescription => 'Add an OPDS catalog to browse and download books online';
+  String get noOpdsCatalogsDescription => 'Add OPDS catalogs to browse and download online books';
 
   @override
   String get addOpdsCatalog => 'Add OPDS Catalog';
 
   @override
-  String get deleteOpdsCatalog => 'Delete Catalog';
+  String get editOpdsCatalog => 'Edit OPDS Catalog';
 
   @override
-  String deleteOpdsCatalogConfirm(String title) => 'Are you sure you want to delete "$title"?';
+  String get deleteOpdsCatalog => 'Delete OPDS Catalog';
 
   @override
-  String get opdsCatalogDeleted => 'OPDS catalog deleted';
-
-  @override
-  String get library => 'Library';
-
-  @override
-  String get disabled => 'Disabled';
-
-  @override
-  String get edit => 'Edit';
-
-  @override
-  String get disable => 'Disable';
-
-  @override
-  String get enable => 'Enable';
-
-  @override
-  String get opdsCatalogUpdated => 'OPDS catalog updated';
+  String deleteOpdsCatalogConfirm(Object title) {
+    return 'Are you sure you want to delete catalog \"$title\"?';
+  }
 
   @override
   String get opdsCatalogAdded => 'OPDS catalog added';
 
   @override
-  String get editOpdsCatalog => 'Edit OPDS Catalog';
+  String get opdsCatalogUpdated => 'OPDS catalog updated';
 
   @override
-  String get opdsUrl => 'OPDS URL';
+  String get opdsCatalogDeleted => 'OPDS catalog deleted';
 
   @override
-  String get fieldRequired => 'This field is required';
+  String get opdsUrl => 'OPDS Catalog URL';
 
   @override
-  String get invalidUrl => 'Invalid URL';
+  String get testConnection => 'Test Connection';
 
   @override
-  String get title => 'Title';
+  String get connectionSuccessful => 'Connection successful';
 
   @override
-  String get username => 'Username';
+  String get failedToLoadOpdsCatalog => 'Failed to load OPDS catalog';
 
   @override
-  String get password => 'Password';
+  String get noBooksFound => 'No books found';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get bookDownloadedSuccessfully => 'Book downloaded successfully';
+
+  @override
+  String failedToDownloadBook(Object error) {
+    return 'Failed to download book: $error';
+  }
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get disabled => 'Disabled';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
+  String get disable => 'Disable';
+
+  @override
+  String get edit => 'Edit';
 
   @override
   String get add => 'Add';
@@ -407,25 +327,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
+  String get fieldRequired => 'This field is required';
+
+  @override
+  String get invalidUrl => 'Invalid URL format';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get noContent => 'No content';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get password => 'Password';
+
+  @override
   String get browseAndDownloadOnlineBooks => 'Browse and download online books';
 
   @override
-  String get errorPageNotFound => 'Page Not Found (404)';
+  String get authenticationRequired => 'Authentication Required';
 
   @override
-  String get errorPageNotFoundSuggestion => 'The requested catalog page does not exist. Please check the URL.';
+  String get authenticationRequiredMessage => 'This OPDS catalog requires authentication. Please enter your credentials.';
 
   @override
-  String errorServer(String statusCode) => 'Server Error ($statusCode)';
+  String get errorPageNotFound => 'Page Not Found';
+
+  @override
+  String get errorPageNotFoundSuggestion => 'The requested page could not be found. Please check the URL.';
+
+  @override
+  String errorServer(Object statusCode) {
+    return 'Server Error ($statusCode)';
+  }
 
   @override
   String get errorServerSuggestion => 'The server encountered an internal error. Please try again later.';
 
   @override
-  String errorAuthFailed(String statusCode) => 'Authentication Failed ($statusCode)';
+  String errorAuthFailed(Object statusCode) {
+    return 'Authentication Failed ($statusCode)';
+  }
 
   @override
-  String get errorAuthFailedSuggestion => 'Authentication required. Please check your credentials in settings.';
+  String get errorAuthFailedSuggestion => 'Authentication required. Please check your credentials.';
 
   @override
   String get errorNetwork => 'Network Connection Failed';
@@ -438,4 +386,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoadFailedSuggestion => 'An unknown error occurred. You can try again.';
+
+  @override
+  String get importBooks => 'Import Books';
+
+  @override
+  String get importFromFile => 'Import from File';
+
+  @override
+  String get importFromFileSubtitle => 'Select files from your device';
+
+  @override
+  String get importFromOpds => 'Import from OPDS';
+
+  @override
+  String get importFromOpdsSubtitle => 'Browse online book catalogs';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get catalogDescription => 'Description';
+
+  @override
+  String get catalogDescriptionHint => 'Optional description';
+
+  @override
+  String get connectionFailed => 'Connection Failed';
+
+  @override
+  String get savePassword => 'Save Password';
+
+  @override
+  String get savePasswordSubtitle => 'Save credentials for future access';
 }
