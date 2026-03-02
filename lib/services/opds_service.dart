@@ -1,19 +1,53 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 import '../models/opds_catalog.dart';
 
 class OpdsService {
   final http.Client _httpClient;
+  Map<String, String>? _cookies;
 
   OpdsService({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client();
 
-  Future<OpdsCatalog> fetchCatalog(String url) async {
+  void setCookies(Map<String, String>? cookies) {
+    _cookies = cookies;
+  }
+
+  void clearCookies() {
+    _cookies = null;
+  }
+
+  Map<String, String>? get cookies => _cookies;
+
+  Future<OpdsCatalog> fetchCatalog(String url, {String? username, String? password, Map<String, String>? cookies}) async {
     try {
+      final headers = <String, String>{
+        'Accept': 'application/atom+xml;profile=opds-catalog;kind=acquisition',
+      };
+
+      if (username != null && password != null && username.isNotEmpty) {
+        final credentials = base64Encode(utf8.encode('$username:$password'));
+        headers['Authorization'] = 'Basic $credentials';
+      }
+
+      final allCookies = <String, String>{};
+      if (_cookies != null) {
+        allCookies.addAll(_cookies!);
+      }
+      if (cookies != null) {
+        allCookies.addAll(cookies);
+      }
+
+      if (allCookies.isNotEmpty) {
+        final cookieString = allCookies.entries.map((e) => '${e.key}=${e.value}').join('; ');
+        headers['Cookie'] = cookieString;
+      }
+
       final response = await _httpClient.get(
         Uri.parse(url),
-        headers: {'Accept': 'application/atom+xml;profile=opds-catalog;kind=acquisition'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -88,11 +122,33 @@ class OpdsService {
     }
   }
 
-  Future<OpdsEntry> fetchEntry(String url) async {
+  Future<OpdsEntry> fetchEntry(String url, {String? username, String? password, Map<String, String>? cookies}) async {
     try {
+      final headers = <String, String>{
+        'Accept': 'application/atom+xml;profile=opds-catalog;kind=acquisition',
+      };
+
+      if (username != null && password != null && username.isNotEmpty) {
+        final credentials = base64Encode(utf8.encode('$username:$password'));
+        headers['Authorization'] = 'Basic $credentials';
+      }
+
+      final allCookies = <String, String>{};
+      if (_cookies != null) {
+        allCookies.addAll(_cookies!);
+      }
+      if (cookies != null) {
+        allCookies.addAll(cookies);
+      }
+
+      if (allCookies.isNotEmpty) {
+        final cookieString = allCookies.entries.map((e) => '${e.key}=${e.value}').join('; ');
+        headers['Cookie'] = cookieString;
+      }
+
       final response = await _httpClient.get(
         Uri.parse(url),
-        headers: {'Accept': 'application/atom+xml;profile=opds-catalog;kind=acquisition'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -130,10 +186,32 @@ class OpdsService {
   Future<void> downloadFile(
     String url,
     String savePath,
-    void Function(double progress)? progressCallback,
-  ) async {
+    void Function(double progress)? progressCallback, {
+    String? username,
+    String? password,
+    Map<String, String>? cookies,
+  }) async {
     try {
       final request = http.Request('GET', Uri.parse(url));
+      
+      if (username != null && password != null && username.isNotEmpty) {
+        final credentials = base64Encode(utf8.encode('$username:$password'));
+        request.headers['Authorization'] = 'Basic $credentials';
+      }
+
+      final allCookies = <String, String>{};
+      if (_cookies != null) {
+        allCookies.addAll(_cookies!);
+      }
+      if (cookies != null) {
+        allCookies.addAll(cookies);
+      }
+
+      if (allCookies.isNotEmpty) {
+        final cookieString = allCookies.entries.map((e) => '${e.key}=${e.value}').join('; ');
+        request.headers['Cookie'] = cookieString;
+      }
+
       final streamedResponse = await _httpClient.send(request);
 
       if (streamedResponse.statusCode != 200) {

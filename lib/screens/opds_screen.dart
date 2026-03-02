@@ -345,6 +345,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
+  late final TextEditingController _cookiesController;
   bool _isTesting = false;
   bool? _testResult;
   String? _testError;
@@ -363,6 +364,9 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
     _passwordController = TextEditingController(
       text: widget.catalog?.password ?? '',
     );
+    _cookiesController = TextEditingController(
+      text: widget.catalog?.cookies?.entries.map((e) => '${e.key}=${e.value}').join('; ') ?? '',
+    );
   }
 
   @override
@@ -372,6 +376,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
     _descriptionController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _cookiesController.dispose();
     super.dispose();
   }
 
@@ -401,7 +406,11 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
 
     try {
       final provider = context.read<OpdsProvider>();
-      final success = await provider.testConnection(_urlController.text);
+      final success = await provider.testConnection(
+        _urlController.text,
+        username: _usernameController.text.isEmpty ? null : _usernameController.text,
+        password: _passwordController.text.isEmpty ? null : _passwordController.text,
+      );
       setState(() {
         _isTesting = false;
         _testResult = success;
@@ -435,6 +444,18 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     try {
+      Map<String, String>? cookiesMap;
+      if (_cookiesController.text.isNotEmpty) {
+        cookiesMap = {};
+        final cookieEntries = _cookiesController.text.split(';');
+        for (final entry in cookieEntries) {
+          final parts = entry.trim().split('=');
+          if (parts.length == 2) {
+            cookiesMap[parts[0].trim()] = parts[1].trim();
+          }
+        }
+      }
+
       if (widget.catalog == null) {
         await provider.addCatalog(
           url: _urlController.text,
@@ -448,6 +469,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
           password: _passwordController.text.isEmpty
               ? null
               : _passwordController.text,
+          cookies: cookiesMap,
         );
       } else {
         final updated = widget.catalog!.copyWith(
@@ -462,6 +484,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
           password: _passwordController.text.isEmpty
               ? null
               : _passwordController.text,
+          cookies: cookiesMap,
         );
         await provider.updateCatalog(updated);
       }
@@ -563,6 +586,16 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
                   border: const OutlineInputBorder(),
                 ),
                 obscureText: true,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _cookiesController,
+                decoration: InputDecoration(
+                  labelText: 'Cookies',
+                  hintText: 'key1=value1; key2=value2',
+                  prefixIcon: const Icon(Icons.cookie),
+                  border: const OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 16),
               if (_testResult != null)

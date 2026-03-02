@@ -44,6 +44,7 @@ class OpdsProvider extends ChangeNotifier {
     String? description,
     String? username,
     String? password,
+    Map<String, String>? cookies,
   }) async {
     _isLoading = true;
     _error = null;
@@ -57,6 +58,7 @@ class OpdsProvider extends ChangeNotifier {
         description: description,
         username: username,
         password: password,
+        cookies: cookies,
         isEnabled: true,
       );
 
@@ -123,29 +125,51 @@ class OpdsProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> testConnection(String url) async {
+  Future<bool> testConnection(String url, {String? username, String? password, Map<String, String>? cookies}) async {
     try {
-      await _opdsService.fetchCatalog(url);
+      await _opdsService.fetchCatalog(url, username: username, password: password, cookies: cookies);
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  Future<OpdsCatalog> fetchCatalog(String url) async {
-    return _opdsService.fetchCatalog(url);
+  Future<OpdsCatalog> fetchCatalog(String url, {String? username, String? password, Map<String, String>? cookies}) async {
+    return _opdsService.fetchCatalog(url, username: username, password: password, cookies: cookies);
   }
 
-  Future<OpdsEntry> fetchEntry(String url) async {
-    return _opdsService.fetchEntry(url);
+  Future<OpdsEntry> fetchEntry(String url, {String? username, String? password, Map<String, String>? cookies}) async {
+    return _opdsService.fetchEntry(url, username: username, password: password, cookies: cookies);
   }
 
   Future<void> downloadFile(
     String url,
     String savePath,
-    void Function(double progress)? progressCallback,
-  ) async {
-    await _opdsService.downloadFile(url, savePath, progressCallback);
+    void Function(double progress)? progressCallback, {
+    String? username,
+    String? password,
+    Map<String, String>? cookies,
+  }) async {
+    await _opdsService.downloadFile(
+      url,
+      savePath,
+      progressCallback,
+      username: username,
+      password: password,
+      cookies: cookies,
+    );
+  }
+
+  void setCookies(Map<String, String>? cookies) {
+    _opdsService.setCookies(cookies);
+  }
+
+  void clearCookies() {
+    _opdsService.clearCookies();
+  }
+
+  Map<String, String>? getCookies() {
+    return _opdsService.cookies;
   }
 
   void clearError() {

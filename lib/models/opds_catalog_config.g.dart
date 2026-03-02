@@ -25,13 +25,14 @@ class OpdsCatalogConfigAdapter extends TypeAdapter<OpdsCatalogConfig> {
       lastAccessed: fields[5] as DateTime?,
       username: fields[6] as String?,
       password: fields[7] as String?,
+      cookies: (fields[8] as Map?)?.cast<String, String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, OpdsCatalogConfig obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class OpdsCatalogConfigAdapter extends TypeAdapter<OpdsCatalogConfig> {
       ..writeByte(6)
       ..write(obj.username)
       ..writeByte(7)
-      ..write(obj.password);
+      ..write(obj.password)
+      ..writeByte(8)
+      ..write(obj.cookies);
   }
 
   @override

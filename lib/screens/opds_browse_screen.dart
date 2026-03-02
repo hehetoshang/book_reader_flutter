@@ -61,7 +61,18 @@ class _OpdsBrowseScreenState extends State<OpdsBrowseScreen> {
 
     try {
       final provider = context.read<OpdsProvider>();
-      final catalog = await provider.fetchCatalog(url);
+      
+      // 设置 cookies
+      if (widget.catalog.cookies != null && widget.catalog.cookies!.isNotEmpty) {
+        provider.setCookies(widget.catalog.cookies);
+      }
+      
+      final catalog = await provider.fetchCatalog(
+        url,
+        username: widget.catalog.username,
+        password: widget.catalog.password,
+        cookies: widget.catalog.cookies,
+      );
       setState(() {
         _catalog = catalog;
         _currentUrl = url;
@@ -698,6 +709,12 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
       final downloadUrl = _resolveUrl(acquisitionLink.href);
 
       final opdsService = OpdsService();
+      
+      // 设置 cookies
+      if (widget.catalog.cookies != null && widget.catalog.cookies!.isNotEmpty) {
+        opdsService.setCookies(widget.catalog.cookies);
+      }
+      
       await opdsService.downloadFile(
         downloadUrl,
         filePath,
@@ -706,6 +723,9 @@ class _BookDetailsDialogState extends State<_BookDetailsDialog> {
             _downloadProgress = progress;
           });
         },
+        username: widget.catalog.username,
+        password: widget.catalog.password,
+        cookies: widget.catalog.cookies,
       );
 
       // 手动处理下载的文件导入

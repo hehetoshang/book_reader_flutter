@@ -28,6 +28,9 @@ class OpdsCatalogConfig extends HiveObject {
   @HiveField(7)
   String? password;
 
+  @HiveField(8)
+  Map<String, String>? cookies;
+
   OpdsCatalogConfig({
     required this.id,
     required this.title,
@@ -37,6 +40,7 @@ class OpdsCatalogConfig extends HiveObject {
     this.lastAccessed,
     this.username,
     this.password,
+    this.cookies,
   });
 
   String get displayTitle => title.isNotEmpty ? title : url;
@@ -50,6 +54,7 @@ class OpdsCatalogConfig extends HiveObject {
     DateTime? lastAccessed,
     String? username,
     String? password,
+    Map<String, String>? cookies,
   }) {
     return OpdsCatalogConfig(
       id: id ?? this.id,
@@ -60,6 +65,7 @@ class OpdsCatalogConfig extends HiveObject {
       lastAccessed: lastAccessed ?? this.lastAccessed,
       username: username ?? this.username,
       password: password ?? this.password,
+      cookies: cookies ?? this.cookies,
     );
   }
 
@@ -73,6 +79,7 @@ class OpdsCatalogConfig extends HiveObject {
       'lastAccessed': lastAccessed?.toIso8601String(),
       'username': username,
       'password': password,
+      'cookies': cookies,
     };
   }
 
@@ -88,6 +95,9 @@ class OpdsCatalogConfig extends HiveObject {
           : null,
       username: map['username'] as String?,
       password: map['password'] as String?,
+      cookies: map['cookies'] != null
+          ? Map<String, String>.from(map['cookies'] as Map)
+          : null,
     );
   }
 
