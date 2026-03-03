@@ -169,7 +169,7 @@ jobs:
       - name: Create macOS DMG
         run: |
           mkdir -p output
-          APP_PATH="build/macos/Build/Products/Release/book_reader.app"
+          APP_PATH="build/macos/Build/Products/Release/book_reader_flutter.app"
           DMG_PATH="output/book_reader_macos_${{ needs.version.outputs.version }}.dmg"
           
           # 创建临时目录用于 DMG 内容
