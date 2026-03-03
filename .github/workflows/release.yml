@@ -166,30 +166,31 @@ jobs:
       - name: Build macOS
         run: flutter build macos --release
 
-      - name: Create macOS DMG
-        run: |
-          mkdir -p output
-          APP_PATH="build/macos/Build/Products/Release/book_reader_flutter.app"
-          DMG_PATH="output/book_reader_macos_${{ needs.version.outputs.version }}.dmg"
+      #- name: Create macOS DMG
+      #  run: |
+      #    mkdir -p output
+      #    APP_PATH="build/macos/Build/Products/Release/book_reader_flutter.app"
+      #    DMG_PATH="output/book_reader_macos_${{ needs.version.outputs.version }}.dmg"
           
           # 创建临时目录用于 DMG 内容
-          mkdir -p dmg_temp
-          cp -r "$APP_PATH" dmg_temp/
+      #    mkdir -p dmg_temp
+      #    cp -r "$APP_PATH" dmg_temp/
           
           # 创建 DMG
-          hdiutil create -volname "book_reader" -srcfolder dmg_temp -ov -format UDZO "$DMG_PATH"
+      #    hdiutil create -volname "book_reader" -srcfolder dmg_temp -ov -format UDZO "$DMG_PATH"
           
           # 清理临时目录
-          rm -rf dmg_temp
+      #    rm -rf dmg_temp
           
-          echo "Created DMG at: $DMG_PATH"
-          ls -lh output/
+          # 输出 DMG 路径
+      #    echo "Created DMG at: $DMG_PATH"
+      #    ls -lh output/
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: output/*
+          path: build/macos/Build/Products/Release/*
 
   # 创建 Release 并上传
   release:
