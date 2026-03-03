@@ -32,6 +32,7 @@ dependencies:
   # EPUB阅读器（使用 katbook_epub_reader）
   katbook_epub_reader:
     path: ./public/katbook_epub_reader
+  # 下一步：Iridium
   
   # 文件选择（全平台支持）
   file_picker: ^8.0.0

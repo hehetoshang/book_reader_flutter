@@ -48,7 +48,8 @@ class _OpdsScreenState extends State<OpdsScreen> {
               context.push('/opds/browse', extra: {'catalog': catalog});
             },
             onEditCatalog: (catalog) => _showEditDialog(context, catalog),
-            onDeleteCatalog: (catalog) => _deleteCatalog(context, opdsProvider, catalog),
+            onDeleteCatalog: (catalog) =>
+                _deleteCatalog(context, opdsProvider, catalog),
           );
         },
       ),
@@ -117,19 +118,19 @@ class _OpdsScreenState extends State<OpdsScreen> {
         title: Text(l10n.deleteOpdsCatalog),
         content: Text(l10n.deleteOpdsCatalogConfirm(catalog.displayTitle)),
         actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            foregroundColor: Theme.of(context).colorScheme.onError,
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
           ),
-          child: Text(l10n.delete),
-        ),
-      ],
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text(l10n.delete),
+          ),
+        ],
       ),
     );
 
@@ -234,7 +235,8 @@ class _CatalogListItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                     if (catalog.description != null &&
@@ -282,8 +284,7 @@ class _CatalogListItem extends StatelessWidget {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final relativeRect = RelativeRect.fromRect(
       Rect.fromPoints(
-        box.localToGlobal(box.size.center(Offset.zero),
-            ancestor: overlay),
+        box.localToGlobal(box.size.center(Offset.zero), ancestor: overlay),
         box.localToGlobal(box.size.center(Offset.zero), ancestor: overlay),
       ),
       Offset.zero & overlay.size,
@@ -305,7 +306,8 @@ class _CatalogListItem extends StatelessWidget {
         PopupMenuItem(
           value: 'delete',
           child: ListTile(
-            leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+            leading:
+                Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
             title: Text(
               l10n.delete,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -345,10 +347,10 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
-  late final TextEditingController _cookiesController;
   bool _isTesting = false;
   bool? _testResult;
   String? _testError;
+  bool _cookiesCleared = false;
 
   @override
   void initState() {
@@ -364,9 +366,6 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
     _passwordController = TextEditingController(
       text: widget.catalog?.password ?? '',
     );
-    _cookiesController = TextEditingController(
-      text: widget.catalog?.cookies?.entries.map((e) => '${e.key}=${e.value}').join('; ') ?? '',
-    );
   }
 
   @override
@@ -376,8 +375,38 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
     _descriptionController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
-    _cookiesController.dispose();
     super.dispose();
+  }
+
+  void _clearCookies() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('清除 Cookies'),
+        content: const Text('确定要清除保存的 Cookies 吗？这将删除所有已保存的会话信息。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('清除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _cookiesCleared = true;
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cookies 已清除')),
+        );
+      }
+    }
   }
 
   bool _validateUrl(String value) {
@@ -408,8 +437,10 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
       final provider = context.read<OpdsProvider>();
       final success = await provider.testConnection(
         _urlController.text,
-        username: _usernameController.text.isEmpty ? null : _usernameController.text,
-        password: _passwordController.text.isEmpty ? null : _passwordController.text,
+        username:
+            _usernameController.text.isEmpty ? null : _usernameController.text,
+        password:
+            _passwordController.text.isEmpty ? null : _passwordController.text,
       );
       setState(() {
         _isTesting = false;
@@ -426,9 +457,11 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
           _testError = '页面未找到 (404)';
         } else if (errorMessage.contains('500')) {
           _testError = '服务器错误 (500)';
-        } else if (errorMessage.contains('401') || errorMessage.contains('403')) {
+        } else if (errorMessage.contains('401') ||
+            errorMessage.contains('403')) {
           _testError = '认证失败，请检查用户名和密码';
-        } else if (errorMessage.contains('Network') || errorMessage.contains('Socket')) {
+        } else if (errorMessage.contains('Network') ||
+            errorMessage.contains('Socket')) {
           _testError = '网络连接失败，请检查网络';
         } else {
           _testError = '连接失败：${e.toString().split(': ').last}';
@@ -444,17 +477,18 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     try {
+      // 处理 Cookies：如果用户点击了清除按钮，则清除 Cookies
       Map<String, String>? cookiesMap;
-      if (_cookiesController.text.isNotEmpty) {
-        cookiesMap = {};
-        final cookieEntries = _cookiesController.text.split(';');
-        for (final entry in cookieEntries) {
-          final parts = entry.trim().split('=');
-          if (parts.length == 2) {
-            cookiesMap[parts[0].trim()] = parts[1].trim();
-          }
-        }
+      if (_cookiesCleared) {
+        cookiesMap = null; // 清除 cookies
+      } else if (widget.catalog?.cookies != null) {
+        cookiesMap = widget.catalog!.cookies; // 保留现有 cookies
       }
+
+      final username =
+          _usernameController.text.isEmpty ? null : _usernameController.text;
+      final password =
+          _passwordController.text.isEmpty ? null : _passwordController.text;
 
       if (widget.catalog == null) {
         await provider.addCatalog(
@@ -463,28 +497,24 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
           description: _descriptionController.text.isEmpty
               ? null
               : _descriptionController.text,
-          username: _usernameController.text.isEmpty
-              ? null
-              : _usernameController.text,
-          password: _passwordController.text.isEmpty
-              ? null
-              : _passwordController.text,
+          username: username,
+          password: password,
           cookies: cookiesMap,
         );
       } else {
-        final updated = widget.catalog!.copyWith(
-          url: _urlController.text,
+        // 直接创建新对象，避免 copyWith 无法处理 null 值的问题
+        final updated = OpdsCatalogConfig(
+          id: widget.catalog!.id,
           title: _titleController.text,
+          url: _urlController.text,
           description: _descriptionController.text.isEmpty
               ? null
               : _descriptionController.text,
-          username: _usernameController.text.isEmpty
-              ? null
-              : _usernameController.text,
-          password: _passwordController.text.isEmpty
-              ? null
-              : _passwordController.text,
+          username: username,
+          password: password,
           cookies: cookiesMap,
+          isEnabled: widget.catalog!.isEnabled,
+          lastAccessed: widget.catalog!.lastAccessed,
         );
         await provider.updateCatalog(updated);
       }
@@ -588,13 +618,13 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
                 obscureText: true,
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _cookiesController,
-                decoration: InputDecoration(
-                  labelText: 'Cookies',
-                  hintText: 'key1=value1; key2=value2',
-                  prefixIcon: const Icon(Icons.cookie),
-                  border: const OutlineInputBorder(),
+              OutlinedButton.icon(
+                onPressed: _clearCookies,
+                icon: const Icon(Icons.delete_outline),
+                label: Text(l10n.clearCookies),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                  side: BorderSide(color: Theme.of(context).colorScheme.error),
                 ),
               ),
               const SizedBox(height: 16),
@@ -610,9 +640,7 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
                   child: Row(
                     children: [
                       Icon(
-                        _testResult == true
-                            ? Icons.check_circle
-                            : Icons.error,
+                        _testResult == true ? Icons.check_circle : Icons.error,
                         color: _testResult == true
                             ? Theme.of(context).colorScheme.onPrimaryContainer
                             : Theme.of(context).colorScheme.onErrorContainer,
@@ -625,8 +653,12 @@ class _OpdsAddDialogState extends State<OpdsAddDialog> {
                               : (_testError ?? l10n.connectionFailed),
                           style: TextStyle(
                             color: _testResult == true
-                                ? Theme.of(context).colorScheme.onPrimaryContainer
-                                : Theme.of(context).colorScheme.onErrorContainer,
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onErrorContainer,
                           ),
                         ),
                       ),

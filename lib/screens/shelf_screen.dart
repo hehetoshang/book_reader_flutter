@@ -61,26 +61,13 @@ class _ShelfScreenState extends State<ShelfScreen> {
         ],
       ),
       body: _buildBody(),
-      floatingActionButton: Consumer<BookProvider>(
-        builder: (context, provider, child) {
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return ScaleTransition(scale: animation, child: child);
-            },
-            child: provider.books.isNotEmpty
-                ? GestureDetector(
-                    onLongPress: () => _showImportOptions(context),
-                    child: FloatingActionButton(
-                      key: const ValueKey('fab_visible'),
-                      onPressed: _importBooks,
-                      heroTag: 'import_books',
-                      child: const Icon(Icons.add),
-                    ),
-                  )
-                : const SizedBox.shrink(key: ValueKey('fab_hidden')),
-          );
-        },
+      floatingActionButton: GestureDetector(
+        onLongPress: () => _showImportOptions(context),
+        child: FloatingActionButton(
+          onPressed: _importBooks,
+          heroTag: 'import_books',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

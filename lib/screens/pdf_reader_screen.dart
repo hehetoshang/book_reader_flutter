@@ -32,6 +32,17 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
   double? _savedZoom;
 
+  // PDF 搜索相关
+  PdfTextSearcher? _searcher;
+  String? _currentSearchQuery;
+  bool _isSearching = false;
+  int? _currentMatchIndex;
+  int? _totalMatches;
+
+  // 控制搜索结果面板显示
+  bool _showSearchPanel = false;
+  static const double _searchPanelWidth = 320.0;
+
   @override
   void initState() {
     super.initState();
@@ -77,6 +88,8 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
   @override
   void dispose() {
+    _searcher?.removeListener(_onSearchProgress);
+    _searcher?.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -126,79 +139,208 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
               icon: const Icon(Icons.menu_book),
               onPressed: _showTableOfContents,
             ),
-            // Settings button
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: _showSettings,
-            ),
           ],
         ),
         drawer: _buildTocDrawer(),
-        body: KeyboardListener(
-          focusNode: _focusNode,
-          autofocus: true,
-          onKeyEvent: (KeyEvent event) {
-            if (event is KeyDownEvent) {
-              if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-                if (_currentPage > 1) {
-                  _controller.goToPage(pageNumber: _currentPage - 1);
+        body: Stack(
+          children: [
+            // PDF 阅读器主内容
+            KeyboardListener(
+              focusNode: _focusNode,
+              autofocus: true,
+              onKeyEvent: (KeyEvent event) {
+                if (event is KeyDownEvent) {
+                  if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                    if (_currentPage > 1) {
+                      _controller.goToPage(pageNumber: _currentPage - 1);
+                    }
+                  } else if (event.logicalKey ==
+                      LogicalKeyboardKey.arrowRight) {
+                    if (_currentPage < _totalPages) {
+                      _controller.goToPage(pageNumber: _currentPage + 1);
+                    }
+                  }
                 }
-              } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-                if (_currentPage < _totalPages) {
-                  _controller.goToPage(pageNumber: _currentPage + 1);
-                }
-              }
-            }
-          },
-          child: GestureDetector(
-            onTap: () {
-              _focusNode.requestFocus();
-            },
-            child: ClipRect(
-              child: Column(
-                children: [
-                  // PDF Viewer
-                  Expanded(
-                    child: PdfViewer.file(
-                      _book.filePath,
-                      controller: _controller,
-                      params: PdfViewerParams(
-                        // 设置初始缩放 - 使用保存的缩放值
-                        calculateInitialZoom:
-                            (document, controller, fitZoom, coverZoom) {
-                          // 使用 _savedZoom（在 _loadBook 中从数据库读取）
-                          if (_savedZoom != null && _savedZoom != 1.0) {
-                            return _savedZoom!;
-                          }
-                          return fitZoom;
-                        },
-                        onPageChanged: (pageNumber) {
-                          setState(() {
-                            _currentPage = pageNumber ?? 1;
-                          });
-                          _updateProgress();
-                        },
-                        onDocumentChanged: (document) {
-                          if (document != null) {
-                            setState(() {
-                              _totalPages = document.pages.length;
-                            });
-                            _jumpToSavedPage();
-                          }
-                        },
-                        // 视图准备好后的回调
-                        onViewerReady: (document, controller) {
-                          // 可以在这里添加额外的初始化逻辑
-                        },
+              },
+              child: GestureDetector(
+                onTap: () {
+                  _focusNode.requestFocus();
+                },
+                child: ClipRect(
+                  child: Column(
+                    children: [
+                      // PDF Viewer
+                      Expanded(
+                        child: PdfViewer.file(
+                          _book.filePath,
+                          controller: _controller,
+                          params: PdfViewerParams(
+                            // 设置初始缩放 - 使用保存的缩放值
+                            calculateInitialZoom:
+                                (document, controller, fitZoom, coverZoom) {
+                              // 使用 _savedZoom（在 _loadBook 中从数据库读取）
+                              if (_savedZoom != null && _savedZoom != 1.0) {
+                                return _savedZoom!;
+                              }
+                              return fitZoom;
+                            },
+                            onPageChanged: (pageNumber) {
+                              setState(() {
+                                _currentPage = pageNumber ?? 1;
+                              });
+                              _updateProgress();
+                            },
+                            onDocumentChanged: (document) {
+                              if (document != null) {
+                                setState(() {
+                                  _totalPages = document.pages.length;
+                                });
+                                _jumpToSavedPage();
+                              }
+                            },
+                            // 视图准备好后的回调
+                            onViewerReady: (document, controller) {
+                              // 可以在这里添加额外的初始化逻辑
+                            },
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  // Bottom toolbar
-                  _buildBottomToolbar(),
-                ],
+                ),
               ),
             ),
-          ),
+            // 搜索结果面板
+            if (_showSearchPanel)
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: _searchPanelWidth,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 10,
+                        offset: const Offset(-5, 0),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.search, size: 24),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '搜索结果',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  if (_totalMatches != null)
+                                    Text(
+                                      '${_totalMatches} 个匹配项',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                setState(() {
+                                  _showSearchPanel = false;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child:
+                            _searcher != null && _searcher!.matches.isNotEmpty
+                                ? ListView.builder(
+                                    itemCount: _searcher!.matches.length,
+                                    itemBuilder: (context, index) {
+                                      final match = _searcher!.matches[index];
+                                      final isCurrentMatch =
+                                          index == _currentMatchIndex;
+
+                                      return ListTile(
+                                        title: Text('第 ${match.pageNumber} 页'),
+                                        subtitle: Text(
+                                          _searcher!.getMatchesRangeForPage(
+                                                      match.pageNumber) !=
+                                                  null
+                                              ? '位置：${_searcher!.getMatchesRangeForPage(match.pageNumber)!.start} - ${_searcher!.getMatchesRangeForPage(match.pageNumber)!.end}'
+                                              : '',
+                                        ),
+                                        leading: CircleAvatar(
+                                          backgroundColor: isCurrentMatch
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : null,
+                                          child: Text(
+                                            '${index + 1}',
+                                            style: TextStyle(
+                                              color: isCurrentMatch
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .onPrimary
+                                                  : null,
+                                            ),
+                                          ),
+                                        ),
+                                        selected: isCurrentMatch,
+                                        onTap: () {
+                                          _searcher!.goToMatch(match);
+                                          setState(() {
+                                            _currentMatchIndex = index;
+                                          });
+                                        },
+                                      );
+                                    },
+                                  )
+                                : const Center(
+                                    child: Text('没有搜索结果'),
+                                  ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            // 底部工具栏（固定在底部，最上层 - 放在最后确保在最上面）
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildBottomToolbar(),
+            ),
+          ],
         ),
       ),
     );
@@ -207,6 +349,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   Widget _buildBottomToolbar() {
     final effectiveTotalPages = _totalPages > 0 ? _totalPages : 1;
     final effectiveCurrentPage = _currentPage.clamp(1, effectiveTotalPages);
+    // 只有在搜索面板打开且有搜索结果时才显示搜索导航按钮
+    final hasSearchResults =
+        _showSearchPanel && _searcher != null && _searcher!.matches.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -222,8 +367,28 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       ),
       child: SafeArea(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: hasSearchResults
+              ? MainAxisAlignment.spaceBetween
+              : MainAxisAlignment.spaceEvenly,
           children: [
+            // 搜索导航按钮（只有在搜索面板打开时才显示）
+            if (hasSearchResults) ...[
+              IconButton(
+                icon: const Icon(Icons.keyboard_arrow_up),
+                onPressed: _goToPrevMatch,
+                tooltip: '上一个匹配项',
+              ),
+              Text(
+                '${_currentMatchIndex != null ? _currentMatchIndex! + 1 : 0} / ${_totalMatches ?? 0}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              IconButton(
+                icon: const Icon(Icons.keyboard_arrow_down),
+                onPressed: _goToNextMatch,
+                tooltip: '下一个匹配项',
+              ),
+              const VerticalDivider(width: 24),
+            ],
             // Previous page
             IconButton(
               icon: const Icon(Icons.chevron_left),
@@ -292,25 +457,50 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   }
 
   void _showSearch() {
+    final TextEditingController searchController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Search'),
+        title: const Text('搜索文本'),
         content: TextField(
+          controller: searchController,
           autofocus: true,
           decoration: const InputDecoration(
-            hintText: 'Enter search term',
+            hintText: '输入搜索内容',
             prefixIcon: Icon(Icons.search),
+            border: OutlineInputBorder(),
           ),
+          textInputAction: TextInputAction.search,
           onSubmitted: (value) {
-            Navigator.pop(context);
-            _searchText(value);
+            if (value.isNotEmpty) {
+              Navigator.pop(context);
+              _searchText(value);
+            }
           },
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.pop(context);
+              searchController.dispose();
+            },
+            child: const Text('取消'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              final query = searchController.text;
+              if (query.isNotEmpty) {
+                Navigator.pop(context);
+                _searchText(query);
+                // 延迟 dispose，避免在 Navigator.pop 时还在使用 controller
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  searchController.dispose();
+                });
+              }
+            },
+            icon: const Icon(Icons.search),
+            label: const Text('搜索'),
           ),
         ],
       ),
@@ -318,7 +508,142 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   }
 
   Future<void> _searchText(String query) async {
-    context.showSnackBar('Search: $query');
+    if (!_controller.isReady) {
+      context.showErrorSnackBar('PDF 文档未准备好');
+      return;
+    }
+
+    // 重置之前的搜索
+    _searcher?.dispose();
+
+    setState(() {
+      _searcher = PdfTextSearcher(_controller);
+      _currentSearchQuery = query;
+      _isSearching = true;
+      _currentMatchIndex = null;
+      _totalMatches = null;
+    });
+
+    // 添加监听器
+    _searcher!.addListener(_onSearchProgress);
+
+    // 开始搜索
+    _searcher!.startTextSearch(
+      query,
+      caseInsensitive: true,
+      goToFirstMatch: true,
+      searchImmediately: true,
+    );
+
+    // 显示搜索进度对话框
+    if (mounted) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setDialogState) {
+            // 定期更新对话框状态
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setDialogState(() {});
+              }
+            });
+
+            return AlertDialog(
+              title: const Text('搜索中...'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('搜索内容：$query'),
+                  const SizedBox(height: 16),
+                  if (_isSearching)
+                    const LinearProgressIndicator()
+                  else if (_totalMatches != null)
+                    Text('找到 ${_totalMatches} 个匹配项'),
+                  if (_currentMatchIndex != null && _totalMatches != null)
+                    Text('当前：${_currentMatchIndex! + 1} / $_totalMatches'),
+                ],
+              ),
+              actions: [
+                if (_totalMatches == null || _totalMatches! == 0)
+                  TextButton(
+                    onPressed: () {
+                      _stopSearch();
+                      Navigator.pop(context);
+                    },
+                    child: const Text('取消'),
+                  )
+                else
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showSearchResults();
+                    },
+                    icon: const Icon(Icons.list),
+                    label: const Text('查看结果'),
+                  ),
+              ],
+            );
+          },
+        ),
+      );
+    }
+  }
+
+  void _onSearchProgress() {
+    if (!mounted) return;
+
+    setState(() {
+      _isSearching = _searcher?.isSearching ?? false;
+      _currentMatchIndex = _searcher?.currentIndex;
+      _totalMatches = _searcher?.matches.length;
+    });
+  }
+
+  void _stopSearch() {
+    _searcher?.removeListener(_onSearchProgress);
+    _searcher?.dispose();
+    setState(() {
+      _searcher = null;
+      _isSearching = false;
+    });
+  }
+
+  void _showSearchResults() {
+    if (_searcher == null || _searcher!.matches.isEmpty) {
+      context.showErrorSnackBar('没有找到匹配项');
+      return;
+    }
+
+    // 显示搜索结果面板
+    setState(() {
+      _showSearchPanel = true;
+    });
+  }
+
+  void _goToNextMatch() {
+    if (_searcher == null || _searcher!.matches.isEmpty) {
+      context.showErrorSnackBar('没有搜索结果');
+      return;
+    }
+    _searcher!.goToNextMatch().then((index) {
+      setState(() {
+        _currentMatchIndex = index;
+      });
+    });
+  }
+
+  void _goToPrevMatch() {
+    if (_searcher == null || _searcher!.matches.isEmpty) {
+      context.showErrorSnackBar('没有搜索结果');
+      return;
+    }
+    _searcher!.goToPrevMatch().then((index) {
+      setState(() {
+        _currentMatchIndex = index;
+      });
+    });
   }
 
   void _showTableOfContents() {

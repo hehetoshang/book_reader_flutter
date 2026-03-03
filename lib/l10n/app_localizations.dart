@@ -62,8 +62,7 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,8 +82,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -206,6 +203,12 @@ abstract class AppLocalizations {
   /// **'Cache cleared successfully'**
   String get cacheCleared;
 
+  /// No description provided for @clearCookies.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Cookies'**
+  String get clearCookies;
+
   /// No description provided for @confirm.
   ///
   /// In en, this message translates to:
@@ -281,7 +284,7 @@ abstract class AppLocalizations {
   /// No description provided for @description.
   ///
   /// In en, this message translates to:
-  /// **'A cross-platform reader that supports PDF and EPUB formats'**
+  /// **'Description'**
   String get description;
 
   /// No description provided for @back.
@@ -548,89 +551,71 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get close;
 
-  /// No description provided for @importBooks.
-  ///
-  /// In en, this message translates to:
-  /// **'Import Books'**
-  String get importBooks;
-
-  /// No description provided for @importFromFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Import from File'**
-  String get importFromFile;
-
-  /// No description provided for @importFromFileSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Select PDF or EPUB files from your device'**
-  String get importFromFileSubtitle;
-
-  /// No description provided for @importFromOpds.
-  ///
-  /// In en, this message translates to:
-  /// **'Import from OPDS'**
-  String get importFromOpds;
-
-  /// No description provided for @importFromOpdsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Browse and download books from online OPDS catalogs'**
-  String get importFromOpdsSubtitle;
-
   /// No description provided for @opdsCatalogs.
   ///
   /// In en, this message translates to:
   /// **'OPDS Catalogs'**
   String get opdsCatalogs;
 
-  /// No description provided for @addCatalog.
+  /// No description provided for @noOpdsCatalogs.
   ///
   /// In en, this message translates to:
-  /// **'Add Catalog'**
-  String get addCatalog;
+  /// **'No OPDS Catalogs'**
+  String get noOpdsCatalogs;
 
-  /// No description provided for @editCatalog.
+  /// No description provided for @noOpdsCatalogsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Edit Catalog'**
-  String get editCatalog;
+  /// **'Add OPDS catalogs to browse and download online books'**
+  String get noOpdsCatalogsDescription;
 
-  /// No description provided for @deleteCatalog.
+  /// No description provided for @addOpdsCatalog.
   ///
   /// In en, this message translates to:
-  /// **'Delete Catalog'**
-  String get deleteCatalog;
+  /// **'Add OPDS Catalog'**
+  String get addOpdsCatalog;
 
-  /// No description provided for @catalogUrl.
+  /// No description provided for @editOpdsCatalog.
   ///
   /// In en, this message translates to:
-  /// **'Catalog URL'**
-  String get catalogUrl;
+  /// **'Edit OPDS Catalog'**
+  String get editOpdsCatalog;
 
-  /// No description provided for @catalogTitle.
+  /// No description provided for @deleteOpdsCatalog.
   ///
   /// In en, this message translates to:
-  /// **'Catalog Title'**
-  String get catalogTitle;
+  /// **'Delete OPDS Catalog'**
+  String get deleteOpdsCatalog;
 
-  /// No description provided for @catalogDescription.
+  /// No description provided for @deleteOpdsCatalogConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Catalog Description'**
-  String get catalogDescription;
+  /// **'Are you sure you want to delete catalog \"{title}\"?'**
+  String deleteOpdsCatalogConfirm(Object title);
 
-  /// No description provided for @catalogDescriptionHint.
+  /// No description provided for @opdsCatalogAdded.
   ///
   /// In en, this message translates to:
-  /// **'Optional: Describe this OPDS catalog'**
-  String get catalogDescriptionHint;
+  /// **'OPDS catalog added'**
+  String get opdsCatalogAdded;
 
-  /// No description provided for @catalogUrlHint.
+  /// No description provided for @opdsCatalogUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Enter OPDS catalog Atom feed URL'**
-  String get catalogUrlHint;
+  /// **'OPDS catalog updated'**
+  String get opdsCatalogUpdated;
+
+  /// No description provided for @opdsCatalogDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'OPDS catalog deleted'**
+  String get opdsCatalogDeleted;
+
+  /// No description provided for @opdsUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'OPDS Catalog URL'**
+  String get opdsUrl;
 
   /// No description provided for @testConnection.
   ///
@@ -644,77 +629,17 @@ abstract class AppLocalizations {
   /// **'Connection successful'**
   String get connectionSuccessful;
 
-  /// No description provided for @connectionFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Connection failed'**
-  String get connectionFailed;
-
-  /// No description provided for @downloading.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading...'**
-  String get downloading;
-
-  /// No description provided for @downloadComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Download Complete'**
-  String get downloadComplete;
-
-  /// No description provided for @downloadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Download Failed'**
-  String get downloadFailed;
-
-  /// No description provided for @cancelDownload.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Download'**
-  String get cancelDownload;
-
-  /// No description provided for @bookDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Book Details'**
-  String get bookDetails;
-
-  /// No description provided for @download.
-  ///
-  /// In en, this message translates to:
-  /// **'Download'**
-  String get download;
-
-  /// No description provided for @publisher.
-  ///
-  /// In en, this message translates to:
-  /// **'Publisher'**
-  String get publisher;
-
-  /// No description provided for @published.
-  ///
-  /// In en, this message translates to:
-  /// **'Published'**
-  String get published;
-
   /// No description provided for @failedToLoadOpdsCatalog.
   ///
   /// In en, this message translates to:
-  /// **'Failed to load OPDS catalog: {error}'**
-  String failedToLoadOpdsCatalog(Object error);
+  /// **'Failed to load OPDS catalog'**
+  String get failedToLoadOpdsCatalog;
 
-  /// No description provided for @retry.
+  /// No description provided for @noBooksFound.
   ///
   /// In en, this message translates to:
-  /// **'Retry'**
-  String get retry;
-
-  /// No description provided for @noContent.
-  ///
-  /// In en, this message translates to:
-  /// **'No content'**
-  String get noContent;
+  /// **'No books found'**
+  String get noBooksFound;
 
   /// No description provided for @filters.
   ///
@@ -722,11 +647,11 @@ abstract class AppLocalizations {
   /// **'Filters'**
   String get filters;
 
-  /// No description provided for @noBooksFound.
+  /// No description provided for @download.
   ///
   /// In en, this message translates to:
-  /// **'No books found'**
-  String get noBooksFound;
+  /// **'Download'**
+  String get download;
 
   /// No description provided for @bookDownloadedSuccessfully.
   ///
@@ -746,65 +671,11 @@ abstract class AppLocalizations {
   /// **'Summary'**
   String get summary;
 
-  /// No description provided for @noOpdsCatalogs.
-  ///
-  /// In en, this message translates to:
-  /// **'No OPDS catalogs'**
-  String get noOpdsCatalogs;
-
-  /// No description provided for @noOpdsCatalogsDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Add an OPDS catalog to browse and download books online'**
-  String get noOpdsCatalogsDescription;
-
-  /// No description provided for @addOpdsCatalog.
-  ///
-  /// In en, this message translates to:
-  /// **'Add OPDS Catalog'**
-  String get addOpdsCatalog;
-
-  /// No description provided for @deleteOpdsCatalog.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Catalog'**
-  String get deleteOpdsCatalog;
-
-  /// No description provided for @deleteOpdsCatalogConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete "{title}"?'**
-  String deleteOpdsCatalogConfirm(String title);
-
-  /// No description provided for @opdsCatalogDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'OPDS catalog deleted'**
-  String get opdsCatalogDeleted;
-
-  /// No description provided for @library.
-  ///
-  /// In en, this message translates to:
-  /// **'Library'**
-  String get library;
-
   /// No description provided for @disabled.
   ///
   /// In en, this message translates to:
   /// **'Disabled'**
   String get disabled;
-
-  /// No description provided for @edit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get edit;
-
-  /// No description provided for @disable.
-  ///
-  /// In en, this message translates to:
-  /// **'Disable'**
-  String get disable;
 
   /// No description provided for @enable.
   ///
@@ -812,59 +683,17 @@ abstract class AppLocalizations {
   /// **'Enable'**
   String get enable;
 
-  /// No description provided for @opdsCatalogUpdated.
+  /// No description provided for @disable.
   ///
   /// In en, this message translates to:
-  /// **'OPDS catalog updated'**
-  String get opdsCatalogUpdated;
+  /// **'Disable'**
+  String get disable;
 
-  /// No description provided for @opdsCatalogAdded.
+  /// No description provided for @edit.
   ///
   /// In en, this message translates to:
-  /// **'OPDS catalog added'**
-  String get opdsCatalogAdded;
-
-  /// No description provided for @editOpdsCatalog.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit OPDS Catalog'**
-  String get editOpdsCatalog;
-
-  /// No description provided for @opdsUrl.
-  ///
-  /// In en, this message translates to:
-  /// **'OPDS URL'**
-  String get opdsUrl;
-
-  /// No description provided for @fieldRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'This field is required'**
-  String get fieldRequired;
-
-  /// No description provided for @invalidUrl.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid URL'**
-  String get invalidUrl;
-
-  /// No description provided for @title.
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get title;
-
-  /// No description provided for @username.
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get username;
-
-  /// No description provided for @password.
-  ///
-  /// In en, this message translates to:
-  /// **'Password'**
-  String get password;
+  /// **'Edit'**
+  String get edit;
 
   /// No description provided for @add.
   ///
@@ -878,29 +707,77 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get save;
 
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @invalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL format'**
+  String get invalidUrl;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noContent.
+  ///
+  /// In en, this message translates to:
+  /// **'No content'**
+  String get noContent;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
   /// No description provided for @browseAndDownloadOnlineBooks.
   ///
   /// In en, this message translates to:
   /// **'Browse and download online books'**
   String get browseAndDownloadOnlineBooks;
 
+  /// No description provided for @authenticationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication Required'**
+  String get authenticationRequired;
+
+  /// No description provided for @authenticationRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This OPDS catalog requires authentication. Please enter your credentials.'**
+  String get authenticationRequiredMessage;
+
   /// No description provided for @errorPageNotFound.
   ///
   /// In en, this message translates to:
-  /// **'Page Not Found (404)'**
+  /// **'Page Not Found'**
   String get errorPageNotFound;
 
   /// No description provided for @errorPageNotFoundSuggestion.
   ///
   /// In en, this message translates to:
-  /// **'The requested catalog page does not exist. Please check the URL.'**
+  /// **'The requested page could not be found. Please check the URL.'**
   String get errorPageNotFoundSuggestion;
 
   /// No description provided for @errorServer.
   ///
   /// In en, this message translates to:
   /// **'Server Error ({statusCode})'**
-  String errorServer(String statusCode);
+  String errorServer(Object statusCode);
 
   /// No description provided for @errorServerSuggestion.
   ///
@@ -912,12 +789,12 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Authentication Failed ({statusCode})'**
-  String errorAuthFailed(String statusCode);
+  String errorAuthFailed(Object statusCode);
 
   /// No description provided for @errorAuthFailedSuggestion.
   ///
   /// In en, this message translates to:
-  /// **'Authentication required. Please check your credentials in settings.'**
+  /// **'Authentication required. Please check your credentials.'**
   String get errorAuthFailedSuggestion;
 
   /// No description provided for @errorNetwork.
@@ -943,10 +820,75 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unknown error occurred. You can try again.'**
   String get errorLoadFailedSuggestion;
+
+  /// No description provided for @importBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Books'**
+  String get importBooks;
+
+  /// No description provided for @importFromFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from File'**
+  String get importFromFile;
+
+  /// No description provided for @importFromFileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select files from your device'**
+  String get importFromFileSubtitle;
+
+  /// No description provided for @importFromOpds.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from OPDS'**
+  String get importFromOpds;
+
+  /// No description provided for @importFromOpdsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse online book catalogs'**
+  String get importFromOpdsSubtitle;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @catalogDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get catalogDescription;
+
+  /// No description provided for @catalogDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional description'**
+  String get catalogDescriptionHint;
+
+  /// No description provided for @connectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Failed'**
+  String get connectionFailed;
+
+  /// No description provided for @savePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Password'**
+  String get savePassword;
+
+  /// No description provided for @savePasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save credentials for future access'**
+  String get savePasswordSubtitle;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -955,25 +897,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'zh':
-      return AppLocalizationsZh();
+    case 'en': return AppLocalizationsEn();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }
