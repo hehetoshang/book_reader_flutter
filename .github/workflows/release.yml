@@ -144,9 +144,56 @@ jobs:
           name: linux-build
           path: output/*
 
+  # 构建 macOS
+  build-macos:
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.2'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: flutter build macos --release
+
+      - name: Create macOS DMG
+        run: |
+          mkdir -p output
+          APP_PATH="build/macos/Build/Products/Release/book_reader.app"
+          DMG_PATH="output/book_reader_macos_${{ needs.version.outputs.version }}.dmg"
+          
+          # 创建临时目录用于 DMG 内容
+          mkdir -p dmg_temp
+          cp -r "$APP_PATH" dmg_temp/
+          
+          # 创建 DMG
+          hdiutil create -volname "book_reader" -srcfolder dmg_temp -ov -format UDZO "$DMG_PATH"
+          
+          # 清理临时目录
+          rm -rf dmg_temp
+          
+          echo "Created DMG at: $DMG_PATH"
+          ls -lh output/
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: output/*
+
   # 创建 Release 并上传
   release:
-    needs: [version, build-android, build-windows, build-linux]
+    needs: [version, build-android, build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
