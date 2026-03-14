@@ -35,6 +35,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Update version in pubspec.yaml
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          sed -i "s/^version: .*/version: $VERSION/" pubspec.yaml
+          echo "Updated version to: $VERSION"
+          grep "^version:" pubspec.yaml
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -81,6 +88,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Update version in pubspec.yaml
+        shell: pwsh
+        run: |
+          $VERSION = "${{ needs.version.outputs.version }}"
+          (Get-Content pubspec.yaml) -replace '^version: .*', "version: $VERSION" | Set-Content pubspec.yaml
+          Write-Host "Updated version to: $VERSION"
+          Select-String -Pattern "^version:" pubspec.yaml
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -113,6 +128,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Update version in pubspec.yaml
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          sed -i "s/^version: .*/version: $VERSION/" pubspec.yaml
+          echo "Updated version to: $VERSION"
+          grep "^version:" pubspec.yaml
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -153,6 +175,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Update version in pubspec.yaml
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          sed -i '' "s/^version: .*/version: $VERSION/" pubspec.yaml
+          echo "Updated version to: $VERSION"
+          grep "^version:" pubspec.yaml
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
