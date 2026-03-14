@@ -235,17 +235,25 @@ class BookListItem extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
         onSecondaryTap: onLongPress, // 右键点击支持
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
+        child: SizedBox(
+          height: 125, // 与卡片式高度一致
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Cover/Icon
-              _buildCover(context),
-              const SizedBox(width: 16),
+              Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: SizedBox(
+                  width: 60,
+                  height: 80,
+                  child: _buildCover(context),
+                ),
+              ),
               // Info
               Expanded(
                 child: Padding(
