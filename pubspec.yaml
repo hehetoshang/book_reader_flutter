@@ -4,7 +4,7 @@ homepage: https://github.com/hehetoshang/book_reader_flutter
 repository: https://github.com/hehetoshang/book_reader_flutter
 issue_tracker: https://github.com/hehetoshang/book_reader_flutter/issues
 
-version: 0.0.2
+version: Dev
 publish_to: none
 
 environment:
